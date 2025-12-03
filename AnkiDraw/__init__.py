@@ -667,11 +667,11 @@ var nextStroke = 0;
 var p1,p2,p3;
 
 function is_last_path_and_currently_drawn(i){
-    return (isPointerDown && arrays_of_points.length-1 == i)//the path is complete unless its the last of the array and the pointer is still down
+    return (isPointerDown && arrays_of_points.length-1 <= i)//the path is complete unless its the last of the array and the pointer is still down
 }
 
 function all_drawing_finished(i){
-    return (!isPointerDown && arrays_of_points.length-1 == i)//the path is complete unless its the last of the array and the pointer is still down
+    return (!isPointerDown && arrays_of_points.length-1 >= i)//the path is complete unless its the last of the array and the pointer is still down
 }
 
 async function draw_path_at_some_point_async(startX, startY, midX, midY, endX, endY, lineWidth) {
@@ -787,7 +787,7 @@ function pointerDownLine(e) {
 			e.offsetY,
             e.pointerType[0] == 'p' ? e.pressure : 2,
 			e.pointerType[0] == 'p' ? (1.0 + e.pressure * line_width * 2) : line_width]]);
-        line_type_history.push(['L',arrays_of_points.length-1]);//Add new Simple line marker to shared history
+        line_type_history.push([perfectFreehand? 'P' :'L' ,arrays_of_points.length-1]);//Add new Simple or Perfect line marker to shared history
         start_drawing();
     }
 }

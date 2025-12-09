@@ -84,6 +84,9 @@ def ts_save():
     """
     mw.pm.profile['ts_state_on'] = ts_state_on
     mw.pm.profile['ts_pen1_color'] = ts_pen1_color
+    mw.pm.profile['ts_pen2_color'] = ts_pen2_color
+    mw.pm.profile['ts_pen3_color'] = ts_pen3_color
+    mw.pm.profile['ts_pen4_color'] = ts_pen4_color
     mw.pm.profile['ts_line_width'] = ts_line_width
     mw.pm.profile['ts_opacity'] = ts_opacity
     mw.pm.profile['ts_default_ConvertDotStrokes'] = ts_ConvertDotStrokes
@@ -105,11 +108,9 @@ def ts_load():
     Load configuration from profile, set states of checkable menu objects
     and turn on night mode if it were enabled on previous session.
     """
-    global ts_state_on, ts_pen1_color, ts_profile_loaded, ts_line_width, ts_opacity, ts_ConvertDotStrokes, ts_auto_hide, ts_auto_hide_pointer, ts_default_small_canvas, ts_zen_mode, ts_follow, ts_orient_vertical, ts_y_offset, ts_x_offset, ts_location, ts_small_width, ts_small_height, ts_background_color
+    global ts_state_on, ts_pen1_color, ts_pen2_color, ts_pen3_color, ts_pen4_color, ts_profile_loaded, ts_line_width, ts_opacity, ts_ConvertDotStrokes, ts_auto_hide, ts_auto_hide_pointer, ts_default_small_canvas, ts_zen_mode, ts_follow, ts_orient_vertical, ts_y_offset, ts_x_offset, ts_location, ts_small_width, ts_small_height, ts_background_color
     try:
-        # TODO add settings saving
         ts_state_on = mw.pm.profile['ts_state_on']
-        ts_pen1_color = mw.pm.profile['ts_pen1_color']
         ts_line_width = mw.pm.profile['ts_line_width']
         ts_opacity = mw.pm.profile['ts_opacity']
         ts_auto_hide = mw.pm.profile['ts_auto_hide']
@@ -126,8 +127,7 @@ def ts_load():
         ts_x_offset = mw.pm.profile['ts_x_offset']
         ts_location = mw.pm.profile['ts_location']
     except KeyError:
-        ts_state_on = False
-        ts_pen1_color = "#272828"
+        ts_state_on = True
         ts_line_width = 4
         ts_opacity = 0.8
         ts_auto_hide = True
@@ -143,6 +143,17 @@ def ts_load():
         ts_background_color = "#FFFFFF00"
         ts_x_offset = 2
         ts_location = 1
+
+    try:
+        ts_pen1_color = mw.pm.profile['ts_pen1_color']
+        ts_pen2_color = mw.pm.profile['ts_pen2_color']
+        ts_pen3_color = mw.pm.profile['ts_pen3_color']
+        ts_pen4_color = mw.pm.profile['ts_pen4_color']
+    except KeyError:
+        ts_pen1_color = "#272828"
+        ts_pen1_color = "#149beb"
+        ts_pen1_color = "#ced51a"
+        ts_pen1_color = "#da13a8"
 
     ts_profile_loaded = True
     ts_menu_auto_hide.setChecked(ts_auto_hide)
@@ -1026,6 +1037,11 @@ document.addEventListener('keyup', function(e) {
 		e.preventDefault();
         ts_undo();
     }
+    // // alt + y
+    // if ((e.keyCode == 89 || e.keyCode == "y") && e.altKey) {
+    //     e.preventDefault();
+    //     ts_redo();
+    // }
     // /
     if (e.key === ".") {
         clear_canvas();

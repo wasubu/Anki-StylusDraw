@@ -715,10 +715,10 @@ function update_line_draw_settings(color, width){
     ctx.lineWidth = width;
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
-    secondary_ctx.lineJoin = ctx.lineJoin;
-    secondary_ctx.lineWidth = ctx.lineWidth;
-    secondary_ctx.strokeStyle = ctx.strokeStyle;
-    secondary_ctx.fillStyle = ctx.fillStyle;
+    // secondary_ctx.lineJoin = ctx.lineJoin;
+    // secondary_ctx.lineWidth = ctx.lineWidth;
+    // secondary_ctx.strokeStyle = ctx.strokeStyle;
+    // secondary_ctx.fillStyle = ctx.fillStyle;
 }
 
 function ts_undo(){

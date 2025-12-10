@@ -62,7 +62,9 @@ ts_line_width2 = 4
 ts_pen3_color = "#ced51a"
 ts_line_width3 = 20
 ts_pen4_color = "#da13a8"
+# TODO Handle width selection and saving
 ts_line_width4 = 4
+# TODO Handle opacity selection and saving
 ts_opacity = 0.7
 ts_location = 1
 ts_x_offset = 2
@@ -466,14 +468,15 @@ var stroke_delete_list = [ ];//array of array of objects{array_of_x_deleted, ind
 var line_type_history = [ ];
 var perfect_cache = [ ];
 
+var index = 0;
 
 canvas.onselectstart = function() { return false; };
 secondary_canvas.onselectstart = function() { return false; };
 wrapper.onselectstart = function() { return false; };
 
 function PlaySound(){
-    var elem = document.querySelector(".soundLink, .replaybutton");
-    if (elem) { elem.click(); }
+    var selectors = document.querySelectorAll(".soundLink, .replaybutton")
+    if (selectors) { selectors[index++ % selectors.length].click(); }
 }
 function recolor_based_on_active_pen()
 {   
@@ -791,6 +794,7 @@ function ts_undo(){
 //         ts_undo_button.className = "";
 //     }
 // }
+// TODO add redo functionality
 // function ts_redo() {
 //     stop_drawing();
 //     if (redo_stack.length < 1) return;
@@ -1381,7 +1385,7 @@ def ts_change_pen2_color():
 @slot()
 def ts_change_pen3_color():
     """
-    Open color picker and set chosen color for Pen 1.
+    Open color picker and set chosen color for Pen 3.
     """
     global ts_pen3_color
     qcolor_old = QColor(ts_pen3_color)
@@ -1395,7 +1399,7 @@ def ts_change_pen3_color():
 @slot()
 def ts_change_pen4_color():
     """
-    Open color picker and set chosen color for Pen 2.
+    Open color picker and set chosen color for Pen 4.
     """
     global ts_pen4_color
     qcolor_old = QColor(ts_pen4_color)

@@ -56,14 +56,13 @@ ts_follow = False
 ts_ConvertDotStrokes = True
 
 ts_pen1_color = "#272828"
-ts_line_width = 4
+ts_pen1_width = 4
 ts_pen2_color = "#149beb"
-ts_line_width2 = 4
+ts_pen2_width = 8
 ts_pen3_color = "#ced51a"
-ts_line_width3 = 20
+ts_pen3_width = 20
 ts_pen4_color = "#da13a8"
-# TODO Handle width selection and saving
-ts_line_width4 = 4
+ts_pen4_width = 2
 # TODO Handle opacity selection and saving
 ts_opacity = 0.7
 ts_location = 1
@@ -89,7 +88,10 @@ def ts_save():
     mw.pm.profile['ts_pen2_color'] = ts_pen2_color
     mw.pm.profile['ts_pen3_color'] = ts_pen3_color
     mw.pm.profile['ts_pen4_color'] = ts_pen4_color
-    mw.pm.profile['ts_line_width'] = ts_line_width
+    mw.pm.profile['ts_pen1_width'] = ts_pen1_width
+    mw.pm.profile['ts_pen2_width'] = ts_pen2_width
+    mw.pm.profile['ts_pen3_width'] = ts_pen3_width
+    mw.pm.profile['ts_pen4_width'] = ts_pen4_width
     mw.pm.profile['ts_opacity'] = ts_opacity
     mw.pm.profile['ts_default_ConvertDotStrokes'] = ts_ConvertDotStrokes
     mw.pm.profile['ts_auto_hide'] = ts_auto_hide
@@ -110,10 +112,9 @@ def ts_load():
     Load configuration from profile, set states of checkable menu objects
     and turn on night mode if it were enabled on previous session.
     """
-    global ts_state_on, ts_pen1_color, ts_pen2_color, ts_pen3_color, ts_pen4_color, ts_profile_loaded, ts_line_width, ts_opacity, ts_ConvertDotStrokes, ts_auto_hide, ts_auto_hide_pointer, ts_default_small_canvas, ts_zen_mode, ts_follow, ts_orient_vertical, ts_y_offset, ts_x_offset, ts_location, ts_small_width, ts_small_height, ts_background_color
+    global ts_state_on, ts_pen1_color, ts_pen2_color, ts_pen3_color, ts_pen4_color, ts_profile_loaded, ts_pen1_width, ts_pen2_width, ts_pen3_width, ts_pen4_width, ts_opacity, ts_ConvertDotStrokes, ts_auto_hide, ts_auto_hide_pointer, ts_default_small_canvas, ts_zen_mode, ts_follow, ts_orient_vertical, ts_y_offset, ts_x_offset, ts_location, ts_small_width, ts_small_height, ts_background_color
     try:
         ts_state_on = mw.pm.profile['ts_state_on']
-        ts_line_width = mw.pm.profile['ts_line_width']
         ts_opacity = mw.pm.profile['ts_opacity']
         ts_auto_hide = mw.pm.profile['ts_auto_hide']
         ts_auto_hide_pointer = mw.pm.profile['ts_auto_hide_pointer']
@@ -130,7 +131,7 @@ def ts_load():
         ts_location = mw.pm.profile['ts_location']
     except KeyError:
         ts_state_on = True
-        ts_line_width = 4
+        ts_pen1_width = 4
         ts_opacity = 0.8
         ts_auto_hide = True
         ts_auto_hide_pointer = True
@@ -156,6 +157,19 @@ def ts_load():
         ts_pen1_color = "#149beb"
         ts_pen1_color = "#ced51a"
         ts_pen1_color = "#da13a8"
+
+    try:
+        ts_pen1_width = mw.pm.profile['ts_pen1_width']
+        ts_pen2_width = mw.pm.profile['ts_pen2_width']
+        ts_pen3_width = mw.pm.profile['ts_pen3_width']
+        ts_pen4_width = mw.pm.profile['ts_pen4_width']
+    except KeyError:
+        ts_pen1_width = 4
+        ts_pen2_width = 6
+        ts_pen3_width = 20
+        ts_pen4_width = 8
+    
+
 
     ts_profile_loaded = True
     ts_menu_auto_hide.setChecked(ts_auto_hide)
@@ -407,13 +421,13 @@ var fullscreen_follow = """ + str(ts_follow).lower() + """;
 var calligraphy = """ + ts_default_Calligraphy + """;
 var strokeDelete = false;
 var pen1Color = """ + "\'" + str(ts_pen1_color) + "\'" + """;
-var pen1Width = """ + str(ts_line_width) + """;
+var pen1Width = """ + str(ts_pen1_width) + """;
 var pen2Color = """ + "\'" + str(ts_pen2_color) + "\'" + """;
-var pen2Width = """ + str(ts_line_width2) + """;
+var pen2Width = """ + str(ts_pen2_width) + """;
 var pen3Color = """ + "\'" + str(ts_pen3_color) + "\'" + """;
-var pen3Width = """ + str(ts_line_width3) + """;
+var pen3Width = """ + str(ts_pen3_width) + """;
 var pen4Color = """ + "\'" + str(ts_pen4_color) + "\'" + """;
-var pen4Width = """ + str(ts_line_width4) + """;
+var pen4Width = """ + str(ts_pen4_width) + """;
 var activePenIndex = 0;
 
 function getPenColorAndWidthByIndex(index){
@@ -422,13 +436,13 @@ function getPenColorAndWidthByIndex(index){
             return [pen1Color, pen1Width];
         break;
         case 1:
-            return [pen2Color, pen1Width];
+            return [pen2Color, pen2Width];
         break;
         case 2:
-            return [pen3Color, pen1Width];
+            return [pen3Color, pen3Width];
         break;
         case 3:
-            return [pen4Color, pen1Width];
+            return [pen4Color, pen4Width];
         break;
         default:
             console.error("error too large index for pen selection")
@@ -1355,68 +1369,38 @@ def custom(*args, **kwargs):
 mw.reviewer.revHtml = custom
 
 @slot()
-def ts_change_pen1_color():
+def ts_change_pen_color(pen_number):
     """
-    Open color picker and set chosen color for Pen 1.
+    Open color picker and set chosen color for the specified pen.
     """
-    global ts_pen1_color
-    qcolor_old = QColor(ts_pen1_color)
+    # Get current color from global variable
+    current_color = globals()[f"ts_pen{pen_number}_color"]
+    qcolor_old = QColor(current_color)
     qcolor = QColorDialog.getColor(qcolor_old)
+    
     if qcolor.isValid():
-        ts_pen1_color = qcolor.name()
+        # Update the global variable
+        globals()[f"ts_pen{pen_number}_color"] = qcolor.name()
+        
         # Reload the reviewer to apply the new color
-        execute_js("pen1Color = '" + ts_pen1_color + "';")
+        execute_js(f"pen{pen_number}Color = '{qcolor.name()}';")
         execute_js("if (typeof update_pen_settings === 'function') { update_pen_settings(); }")
 
 @slot()
-def ts_change_pen2_color():
+def ts_change_pen_width(pen_number):
     """
-    Open color picker and set chosen color for Pen 2.
+    Open width picker and set chosen width for the specified pen.
     """
-    global ts_pen2_color
-    qcolor_old = QColor(ts_pen2_color)
-    qcolor = QColorDialog.getColor(qcolor_old)
-    if qcolor.isValid():
-        ts_pen2_color = qcolor.name()
-        # Reload the reviewer to apply the new color
-        execute_js("pen2Color = '" + ts_pen2_color + "';")
-        execute_js("if (typeof update_pen_settings === 'function') { update_pen_settings(); }")
-
-@slot()
-def ts_change_pen3_color():
-    """
-    Open color picker and set chosen color for Pen 3.
-    """
-    global ts_pen3_color
-    qcolor_old = QColor(ts_pen3_color)
-    qcolor = QColorDialog.getColor(qcolor_old)
-    if qcolor.isValid():
-        ts_pen3_color = qcolor.name()
-        # Reload the reviewer to apply the new color
-        execute_js("pen3Color = '" + ts_pen3_color + "';")
-        execute_js("if (typeof update_pen_settings === 'function') { update_pen_settings(); }")
-
-@slot()
-def ts_change_pen4_color():
-    """
-    Open color picker and set chosen color for Pen 4.
-    """
-    global ts_pen4_color
-    qcolor_old = QColor(ts_pen4_color)
-    qcolor = QColorDialog.getColor(qcolor_old)
-    if qcolor.isValid():
-        ts_pen4_color = qcolor.name()
-        # Reload the reviewer to apply the new color
-        execute_js("pen4Color = '" + ts_pen4_color + "';")
-        execute_js("if (typeof update_pen_settings === 'function') { update_pen_settings(); }")
-
-@slot()
-def ts_change_width():
-    global ts_line_width
-    value, accepted = QInputDialog.getDouble(mw, "AnkiDraw", "Enter the width:", ts_line_width)
+    # Get current width from global variable
+    current_width = globals()[f"ts_pen{pen_number}_width"]
+    value, accepted = QInputDialog.getDouble(mw, "AnkiDraw", f"Enter the pen {pen_number} width:", current_width)
+    
     if accepted:
-        ts_line_width = value
-        execute_js("pen1Width = '" + str(ts_line_width) + "';")
+        # Update the global variable
+        globals()[f"ts_pen{pen_number}_width"] = value
+        
+        # Reload the reviewer to apply the new width
+        execute_js(f"pen{pen_number}Width = '{value}';")
         execute_js("if (typeof update_pen_settings === 'function') { update_pen_settings(); }")
 
 @slot()
@@ -1696,23 +1680,31 @@ def ts_setup_menu():
     ts_menu_follow = QAction("""&Follow when scrolling (faster on big cards)""", mw, checkable=True)
     ts_menu_small_default = QAction("""&Small Canvas by default""", mw, checkable=True)
     ts_menu_zen_mode = QAction("""Enable Zen Mode(hide toolbar until disabled)""", mw, checkable=True)
-    ts_menu_width = QAction("""Set pen &width""", mw)
     ts_menu_opacity = QAction("""Set pen &opacity""", mw)
     ts_toolbar_settings = QAction("""&Toolbar and canvas location settings""", mw)
 
     ts_toggle_seq = QKeySequence("Ctrl+r")
     ts_menu_switch.setShortcut(ts_toggle_seq)
 
-    ts_pen_color_menu = QMenu("Set &pen 1-4 color", mw)
-    ts_menu_pen1_color = QAction("Set Pen &1 Color", mw)
-    ts_menu_pen2_color = QAction("Set Pen &2 Color", mw)
-    ts_menu_pen3_color = QAction("Set Pen &3 Color", mw)
-    ts_menu_pen4_color = QAction("Set Pen &4 Color", mw)
+    ts_pen_color_menu = QMenu("Set pen 1-4 color", mw)
+    ts_menu_pen1_color = QAction("Set Pen 1 Color", mw)
+    ts_menu_pen2_color = QAction("Set Pen 2 Color", mw)
+    ts_menu_pen3_color = QAction("Set Pen 3 Color", mw)
+    ts_menu_pen4_color = QAction("Set Pen 4 Color", mw)
     ts_pen_color_menu.addAction(ts_menu_pen1_color)
     ts_pen_color_menu.addAction(ts_menu_pen2_color)
     ts_pen_color_menu.addAction(ts_menu_pen3_color)
     ts_pen_color_menu.addAction(ts_menu_pen4_color)
-    
+
+    ts_pen_width_menu = QMenu("Set pen 1-4 width", mw)
+    ts_menu_pen1_width = QAction("Set Pen 1 width", mw)
+    ts_menu_pen2_width = QAction("Set Pen 2 width", mw)
+    ts_menu_pen3_width = QAction("Set Pen 3 width", mw)
+    ts_menu_pen4_width = QAction("Set Pen 4 width", mw)
+    ts_pen_width_menu.addAction(ts_menu_pen1_width)
+    ts_pen_width_menu.addAction(ts_menu_pen2_width)
+    ts_pen_width_menu.addAction(ts_menu_pen3_width)
+    ts_pen_width_menu.addAction(ts_menu_pen4_width)
 
     mw.addon_view_menu.addAction(ts_menu_switch)
     mw.addon_view_menu.addAction(ts_menu_dots)
@@ -1722,14 +1714,18 @@ def ts_setup_menu():
     mw.addon_view_menu.addAction(ts_menu_small_default)
     mw.addon_view_menu.addAction(ts_menu_zen_mode)
     mw.addon_view_menu.addMenu(ts_pen_color_menu)
-    mw.addon_view_menu.addAction(ts_menu_width)
+    mw.addon_view_menu.addMenu(ts_pen_width_menu)
     mw.addon_view_menu.addAction(ts_menu_opacity)
     mw.addon_view_menu.addAction(ts_toolbar_settings)
 
-    ts_menu_pen1_color.triggered.connect(ts_change_pen1_color)
-    ts_menu_pen2_color.triggered.connect(ts_change_pen2_color)
-    ts_menu_pen3_color.triggered.connect(ts_change_pen3_color)
-    ts_menu_pen4_color.triggered.connect(ts_change_pen4_color)
+    ts_menu_pen1_color.triggered.connect(lambda: ts_change_pen_color(1))
+    ts_menu_pen2_color.triggered.connect(lambda: ts_change_pen_color(2))
+    ts_menu_pen3_color.triggered.connect(lambda: ts_change_pen_color(3))
+    ts_menu_pen4_color.triggered.connect(lambda: ts_change_pen_color(4))
+    ts_menu_pen1_width.triggered.connect(lambda: ts_change_pen_width(1))
+    ts_menu_pen2_width.triggered.connect(lambda: ts_change_pen_width(2))
+    ts_menu_pen3_width.triggered.connect(lambda: ts_change_pen_width(3))
+    ts_menu_pen4_width.triggered.connect(lambda: ts_change_pen_width(4))
     ts_menu_switch.triggered.connect(ts_switch)
     ts_menu_dots.triggered.connect(ts_dots)
     ts_menu_auto_hide.triggered.connect(ts_change_auto_hide_settings)
@@ -1737,7 +1733,6 @@ def ts_setup_menu():
     ts_menu_follow.triggered.connect(ts_change_follow_settings)
     ts_menu_small_default.triggered.connect(ts_change_small_default_settings)
     ts_menu_zen_mode.triggered.connect(ts_change_zen_mode_settings)
-    ts_menu_width.triggered.connect(ts_change_width)
     ts_menu_opacity.triggered.connect(ts_change_opacity)
     ts_toolbar_settings.triggered.connect(ts_change_toolbar_settings)
 

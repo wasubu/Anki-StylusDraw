@@ -426,6 +426,7 @@ var small_canvas = """ +  str(ts_default_small_canvas).lower() + """;
 var fullscreen_follow = """ + str(ts_follow).lower() + """;
 var calligraphy = """ + ts_default_Calligraphy + """;
 var strokeDelete = false;
+var isDeleting = false;  // Track if currently deleting (for hold mode)
 var pen1Color = """ + "\'" + str(ts_pen1_color) + "\'" + """;
 var pen1Width = """ + str(ts_pen1_width) + """;
 var pen2Color = """ + "\'" + str(ts_pen2_color) + "\'" + """;
@@ -579,16 +580,31 @@ function switch_calligraphy_mode()
 function switch_stroke_delete_mode()
 {
     stop_drawing();
+    
+
+    // In toggle mode, toggle the strokeDelete boolean
     temp = !strokeDelete;
     reset_drawing_modes()
     strokeDelete = temp;
-    if(strokeDelete)
+    if(strokeDelete || isDeleting)
     {
         ts_stroke_delete_button.className = 'active';
     }
     else{
         ts_stroke_delete_button.className = '';
     }
+}
+
+function start_stroke_delete_mode()
+{
+    isDeleting = true;
+    ts_stroke_delete_button.className = 'active';
+}
+
+function stop_stroke_delete_mode()
+{
+    isDeleting = false;
+    if(!strokeDelete) ts_stroke_delete_button.className = '';
 }
 
 function switch_small_canvas()
@@ -1047,14 +1063,27 @@ function updateVariable() {
     status.textContent = `Variable Value: ${variable}`; // Update display
 }
 
-// document.addEventListener('keydown', function(e) {
-//     // alt + e
-//     if ((e.keyCode == 69 || e.key == "e") && e.altKey) {
-// 		e.preventDefault();
-//         ctx.globalCompositeOperation = "destination-out";
-//     }
-// })
+document.addEventListener('keydown', function(e) {
+    // For hold mode, start deleting when shift+d is pressed
+    if ((e.keyCode == 68 || e.key == "d") && e.shiftKey) {
+        e.preventDefault();
+        // Only activate if this is NOT a repeat event (first press)
+        if (!e.repeat) {
+            switch_stroke_delete_mode();
+        }
+    }
 
+});
+
+document.addEventListener('keyup', function(e) {
+    // For hold mode, stop deleting when shift+d is released
+    if ((e.keyCode == 68 || e.key == "d") && e.shiftKey) {
+        stop_stroke_delete_mode();
+    }
+});
+//TODO fixup name of sensitivity toggel and test?
+//TODO chinese mode?
+//TODO save draw info in cards
 document.addEventListener('keyup', function(e) {
     // alt + z
     if ((e.keyCode == 90 || e.key == "z") && e.altKey) {
@@ -1632,7 +1661,8 @@ def checkProfile():
         showWarning("No profile loaded. AnkiPenDown may not work correctly.")
         return False
     return True
-
+# TODO add smaller button toggle?
+# TODO make screen clear undoable?
 def ts_on():
     """
     Turn on
@@ -1770,3 +1800,4 @@ def ts_onload():
     ts_setup_menu()
 
 ts_onload()
+# TODO add text typing

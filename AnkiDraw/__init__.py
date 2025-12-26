@@ -22,7 +22,7 @@ Important parts of Javascript code inspired by http://creativejs.com/tutorials/p
 """
 
 __addon_name__ = "AnkiDraw"
-__version__ = "1.5"
+__version__ = "1.6"
 
 from pathlib import Path
 
@@ -46,35 +46,44 @@ with open(file.with_name("PerfectFreehand.js"), encoding="utf8") as f:
 # This declarations are there only to be sure that in case of troubles
 # with "profileLoaded" hook everything will work.
 
-ts_state_on = False
+
 ts_profile_loaded = False
-ts_auto_hide = True
-ts_auto_hide_pointer = True
-ts_default_small_canvas = False
-ts_zen_mode = False
-ts_follow = False
-ts_ConvertDotStrokes = True
-ts_pressure_sensitivity = True
 
-ts_pen1_color = "#272828"
-ts_pen1_width = 4
-ts_pen2_color = "#149beb"
-ts_pen2_width = 8
-ts_pen3_color = "#ced51a"
-ts_pen3_width = 20
-ts_pen4_color = "#da13a8"
-ts_pen4_width = 2
-# TODO Handle opacity selection and saving
-ts_opacity = 0.7
-ts_location = 1
-ts_x_offset = 2
-ts_y_offset = 2
-ts_small_width = 500
-ts_small_height = 500
-ts_background_color = "#FFFFFF00"
-ts_orient_vertical = True
+saved_value_defaults = {
+    'ts_state_on': True,
+    'ts_opacity': 0.8,
+    'ts_auto_hide': True,
+    'ts_auto_hide_pointer': True,
+    'ts_default_small_canvas': False,
+    'ts_zen_mode': False,
+    'ts_follow': False,
+    'ts_pressure_sensitivity': True,
+    'ts_orient_vertical': True,
+    'ts_y_offset': 2,
+    'ts_small_width': 500,
+    'ts_small_height': 500,
+    'ts_background_color': "#FFFFFF00",
+    'ts_x_offset': 2,
+    'ts_location': 1,
+    'ts_pen1_color': "#272828",
+    'ts_pen2_color': "#149beb",
+    'ts_pen3_color': "#ced51a",
+    'ts_pen4_color': "#da13a8",
+    'ts_pen1_width': 4,
+    'ts_pen2_width': 6,
+    'ts_pen3_width': 20,
+    'ts_pen4_width': 8,
+    'ts_pen1_opacity': 0.8,
+    'ts_pen2_opacity': 0.9,
+    'ts_pen3_opacity': 0.5,
+    'ts_pen4_opacity': 0.7,
+}
+
+# Create the variables in the global scope
+for key, value in saved_value_defaults.items():
+    globals()[key] = value
+
 ts_default_review_html = mw.reviewer.revHtml
-
 ts_default_VISIBILITY = "true"
 ts_default_PerfFreehand = "false"
 ts_default_Calligraphy = "false"
@@ -84,96 +93,21 @@ def ts_save():
     Saves configurable variables into profile, so they can
     be used to restore previous state after Anki restart.
     """
-    mw.pm.profile['ts_state_on'] = ts_state_on
-    mw.pm.profile['ts_pen1_color'] = ts_pen1_color
-    mw.pm.profile['ts_pen2_color'] = ts_pen2_color
-    mw.pm.profile['ts_pen3_color'] = ts_pen3_color
-    mw.pm.profile['ts_pen4_color'] = ts_pen4_color
-    mw.pm.profile['ts_pen1_width'] = ts_pen1_width
-    mw.pm.profile['ts_pen2_width'] = ts_pen2_width
-    mw.pm.profile['ts_pen3_width'] = ts_pen3_width
-    mw.pm.profile['ts_pen4_width'] = ts_pen4_width
-    mw.pm.profile['ts_opacity'] = ts_opacity
-    mw.pm.profile['ts_default_ConvertDotStrokes'] = ts_ConvertDotStrokes
-    mw.pm.profile['ts_auto_hide'] = ts_auto_hide
-    mw.pm.profile['ts_auto_hide_pointer'] = ts_auto_hide_pointer
-    mw.pm.profile['ts_default_small_canvas'] = ts_default_small_canvas
-    mw.pm.profile['ts_zen_mode'] = ts_zen_mode
-    mw.pm.profile['ts_follow'] = ts_follow
-    mw.pm.profile['ts_pressure_sensitivity'] = ts_pressure_sensitivity
-    mw.pm.profile['ts_location'] = ts_location
-    mw.pm.profile['ts_x_offset'] = ts_x_offset
-    mw.pm.profile['ts_y_offset'] = ts_y_offset
-    mw.pm.profile['ts_small_height'] = ts_small_height
-    mw.pm.profile['ts_background_color'] = ts_background_color
-    mw.pm.profile['ts_small_width'] = ts_small_width
-    mw.pm.profile['ts_orient_vertical'] = ts_orient_vertical
+    # Save all default variables to profile
+    for key, value in globals().items():
+        if key in saved_value_defaults:
+            mw.pm.profile[key] = value
 
 def ts_load():
     """
     Load configuration from profile, set states of checkable menu objects
     and turn on night mode if it were enabled on previous session.
     """
-    global ts_state_on, ts_pen1_color, ts_pen2_color, ts_pen3_color, ts_pen4_color, ts_profile_loaded, ts_pen1_width, ts_pen2_width, ts_pen3_width, ts_pen4_width, ts_opacity, ts_ConvertDotStrokes, ts_auto_hide, ts_auto_hide_pointer, ts_default_small_canvas, ts_zen_mode, ts_follow, ts_orient_vertical, ts_y_offset, ts_x_offset, ts_location, ts_small_width, ts_small_height, ts_background_color, ts_pressure_sensitivity
-    try:
-        ts_state_on = mw.pm.profile['ts_state_on']
-        ts_opacity = mw.pm.profile['ts_opacity']
-        ts_auto_hide = mw.pm.profile['ts_auto_hide']
-        ts_auto_hide_pointer = mw.pm.profile['ts_auto_hide_pointer']
-        ts_default_small_canvas = mw.pm.profile['ts_default_small_canvas']
-        ts_zen_mode = mw.pm.profile['ts_zen_mode']
-        ts_follow = mw.pm.profile['ts_follow']
-        ts_pressure_sensitivity = mw.pm.profile.get('ts_pressure_sensitivity', True)
-        ts_ConvertDotStrokes = bool(mw.pm.profile['ts_default_ConvertDotStrokes'])#fix for previously being a string value, defaults string value to true bool, will be saved as true or false bool after
-        ts_orient_vertical = mw.pm.profile['ts_orient_vertical']
-        ts_y_offset = mw.pm.profile['ts_y_offset']
-        ts_small_width = mw.pm.profile['ts_small_width']
-        ts_small_height = mw.pm.profile['ts_small_height']
-        ts_background_color = mw.pm.profile['ts_background_color']
-        ts_x_offset = mw.pm.profile['ts_x_offset']
-        ts_location = mw.pm.profile['ts_location']
-    except KeyError:
-        ts_state_on = True
-        ts_pen1_width = 4
-        ts_opacity = 0.8
-        ts_auto_hide = True
-        ts_auto_hide_pointer = True
-        ts_default_small_canvas = False
-        ts_zen_mode = False
-        ts_follow = False
-        ts_pressure_sensitivity = True
-        ts_ConvertDotStrokes = True
-        ts_orient_vertical = True
-        ts_y_offset = 2
-        ts_small_width = 500
-        ts_small_height = 500
-        ts_background_color = "#FFFFFF00"
-        ts_x_offset = 2
-        ts_location = 1
-
-    try:
-        ts_pen1_color = mw.pm.profile['ts_pen1_color']
-        ts_pen2_color = mw.pm.profile['ts_pen2_color']
-        ts_pen3_color = mw.pm.profile['ts_pen3_color']
-        ts_pen4_color = mw.pm.profile['ts_pen4_color']
-    except KeyError:
-        ts_pen1_color = "#272828"
-        ts_pen2_color = "#149beb"
-        ts_pen3_color = "#ced51a"
-        ts_pen4_color = "#da13a8"
-
-    try:
-        ts_pen1_width = mw.pm.profile['ts_pen1_width']
-        ts_pen2_width = mw.pm.profile['ts_pen2_width']
-        ts_pen3_width = mw.pm.profile['ts_pen3_width']
-        ts_pen4_width = mw.pm.profile['ts_pen4_width']
-    except KeyError:
-        ts_pen1_width = 4
-        ts_pen2_width = 6
-        ts_pen3_width = 20
-        ts_pen4_width = 8
+    global ts_profile_loaded
     
-
+    # Load each variable from profile or use default
+    for key, default in saved_value_defaults.items():
+        globals()[key] = mw.pm.profile.get(key, default)
 
     ts_profile_loaded = True
     ts_menu_auto_hide.setChecked(ts_auto_hide)
@@ -182,7 +116,6 @@ def ts_load():
     ts_menu_zen_mode.setChecked(ts_zen_mode)
     ts_menu_follow.setChecked(ts_follow)
     ts_menu_pressure.setChecked(ts_pressure_sensitivity)
-    ts_menu_dots.setChecked(ts_ConvertDotStrokes)
     if ts_state_on:
         ts_on()
 
@@ -370,7 +303,6 @@ body {
   }
 #main_canvas, #secondary_canvas {
   background: var(--background-color);
-  opacity: """ + str(ts_opacity) + """;
   border-style: none;
   border-width: 1px;
 }
@@ -420,7 +352,6 @@ def blackboard_js():
 // Set from python qt ui
 var visible = """ + ts_default_VISIBILITY + """;
 var perfectFreehand = """ + ts_default_PerfFreehand +""";
-var convertDotStrokes = """ + str(ts_ConvertDotStrokes).lower() + """;
 var pressureSensitivity = """ + str(ts_pressure_sensitivity).lower() + """;
 var small_canvas = """ +  str(ts_default_small_canvas).lower() + """;
 var fullscreen_follow = """ + str(ts_follow).lower() + """;
@@ -435,26 +366,53 @@ var pen3Color = """ + "\'" + str(ts_pen3_color) + "\'" + """;
 var pen3Width = """ + str(ts_pen3_width) + """;
 var pen4Color = """ + "\'" + str(ts_pen4_color) + "\'" + """;
 var pen4Width = """ + str(ts_pen4_width) + """;
-var activePenIndex = 0;
+var pen1Opacity = """ + str(ts_pen1_opacity) + """;
+var pen2Opacity = """ + str(ts_pen2_opacity) + """;
+var pen3Opacity = """ + str(ts_pen3_opacity) + """;
+var pen4Opacity = """ + str(ts_pen4_opacity) + """;
+var activePenIndex = 0;\
+var convertDotStrokes = true
 
 function getPenColorAndWidthByIndex(index){
     switch (index) {
         case 0:
-            return [pen1Color, pen1Width];
+            return [hexToRgba(pen1Color, pen1Opacity), pen1Width];
         break;
         case 1:
-            return [pen2Color, pen2Width];
+            return [hexToRgba(pen2Color, pen2Opacity), pen2Width];
         break;
         case 2:
-            return [pen3Color, pen3Width];
+            return [hexToRgba(pen3Color, pen3Opacity), pen3Width];
         break;
         case 3:
-            return [pen4Color, pen4Width];
+            return [hexToRgba(pen4Color, pen4Opacity), pen4Width];
         break;
         default:
             console.error("error too large index for pen selection")
             break;
     }
+}
+
+// Helper function to convert hex color to RGBA with opacity
+function hexToRgba(hex, opacity) {
+    // Remove the hash if present
+    hex = hex.replace(/^#/, '');
+    
+    // Parse the hex values
+    let r, g, b;
+    if (hex.length === 3) {
+        r = parseInt(hex[0] + hex[0], 16);
+        g = parseInt(hex[1] + hex[1], 16);
+        b = parseInt(hex[2] + hex[2], 16);
+    } else if (hex.length === 6 || hex.length === 8) {
+        r = parseInt(hex.substring(0, 2), 16);
+        g = parseInt(hex.substring(2, 4), 16);
+        b = parseInt(hex.substring(4, 6), 16);
+    } else {
+        return hex; // Return as-is if not a valid hex color
+    }
+    
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 }
 
 // HTML references
@@ -481,6 +439,7 @@ var ts_switch_pen3_button_path = document.querySelector('#ts_switch_pen3_button 
 var ts_switch_pen4_button_path = document.querySelector('#ts_switch_pen4_button > svg > path');
 
 // Arrays to save point values from strokes
+var in_progress_points = [ ]; // For simple lines being drawn
 var arrays_of_points = [ ];
 var arrays_of_calligraphy_points = [ ];
 var arrays_of_points_deleted = [ ];//sparse array of indexes to mark whether an specific stroke is deleted
@@ -737,13 +696,15 @@ function update_pen_settings(){
     stop_drawing()
     ctx.lineJoin = ctx.lineCap = 'round';
     var pen = getPenColorAndWidthByIndex(activePenIndex);
-    ctx.lineWidth = pen[1] //pen Width;
-    ctx.strokeStyle = pen[0] //pen Color;
-    ctx.fillStyle = pen[0] //penColor;
+    ctx.lineWidth = pen[1]; // pen Width
+    ctx.strokeStyle = pen[0]; // pen Color
+    ctx.fillStyle = pen[0]; // pen Color
+    
     secondary_ctx.lineJoin = ctx.lineJoin;
     secondary_ctx.lineWidth = ctx.lineWidth;
-    secondary_ctx.strokeStyle = ctx.strokeStyle;
-    secondary_ctx.fillStyle = ctx.fillStyle;
+    secondary_ctx.strokeStyle = pen[0].replace(/[\d\.]+\)$/g, '1)');
+    secondary_ctx.fillStyle = pen[0].replace(/[\d\.]+\)$/g, '1)');
+    
     recolor_based_on_active_pen()
     ts_redraw()
 }
@@ -751,25 +712,31 @@ function update_pen_settings(){
 function reset_to_main_pen_settings(){
     ctx.lineJoin = ctx.lineCap = 'round';
     var pen = getPenColorAndWidthByIndex(activePenIndex);
-    ctx.lineWidth = pen[1] //pen Width;
-    ctx.strokeStyle = pen[0] //pen Color;
-    ctx.fillStyle = pen[0] //penColor;
+    ctx.lineWidth = pen[1]; // pen Width
+    ctx.strokeStyle = pen[0]; // pen Color (now with opacity)
+    ctx.fillStyle = pen[0]; // pen Color (now with opacity)
     secondary_ctx.lineJoin = ctx.lineJoin;
     secondary_ctx.lineWidth = ctx.lineWidth;
-    secondary_ctx.strokeStyle = ctx.strokeStyle;
-    secondary_ctx.fillStyle = ctx.fillStyle;
+    secondary_ctx.strokeStyle = pen[0].replace(/[\d\.]+\)$/g, '1)');
+    secondary_ctx.fillStyle = pen[0].replace(/[\d\.]+\)$/g, '1)');
 }
 
-function update_line_draw_settings(color, width){
+function update_line_draw_settings(color, width, opacity){
     ctx.lineJoin = ctx.lineCap = 'round';
     ctx.lineWidth = width;
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
-    // secondary_ctx.lineJoin = ctx.lineJoin;
-    // secondary_ctx.lineWidth = ctx.lineWidth;
-    // secondary_ctx.strokeStyle = ctx.strokeStyle;
-    // secondary_ctx.fillStyle = ctx.fillStyle;
 }
+
+function switch_to_no_alpha(line_color){
+    ctx.strokeStyle = ctx.strokeStyle.replace(/[\d\.]+\)$/g, '1)');
+    ctx.fillStyle = ctx.strokeStyle
+}
+function switch_back_to_correct_alpha(line_color){
+    ctx.strokeStyle = line_color;
+    ctx.fillStyle = ctx.strokeStyle
+}
+
 
 function ts_undo(){
 	stop_drawing();
@@ -900,29 +867,24 @@ var nextStroke = 0;
 var p1,p2,p3;
 
 function is_last_path_and_currently_drawn(i){
-    return (isPointerDown && arrays_of_points.length-1 <= i)//the path is complete unless its the last of the array and the pointer is still down
+    return (isPointerDown && line_type_history.length-1 <= i)//the path is complete unless its the last of the array and the pointer is still down
 }
 
 function all_drawing_finished(i){
-    return (!isPointerDown && arrays_of_points.length-1 >= i)//the path is complete unless its the last of the array and the pointer is still down
+    return (!isPointerDown && line_type_history.length-1 >= i)//the path is complete unless its the last of the array and the pointer is still down
 }
 
-async function draw_path_at_some_point_async(startX, startY, midX, midY, endX, endY, lineWidth) {
+async function draw_path_at_some_point_async(startX, startY, midX, midY, endX, endY) {
 		ctx.beginPath();
 		ctx.moveTo((startX + (midX - startX) / 2), (startY + (midY - startY)/ 2));//midpoint calculation for x and y
 		ctx.quadraticCurveTo(midX, midY, (midX + (endX - midX) / 2), (midY + (endY - midY)/ 2));
-		ctx.lineWidth = lineWidth;
 		ctx.stroke();
 };
 
 var pleaseRedrawEverything = false;
 var fullClear = false;
-async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
-	//Don't keep redrawing the same last point over and over
-	//if(!pleaseRedrawEverything && 
-    //(startLine == arrays_of_points.length && startPoint == arrays_of_points[startLine-1].length) && 
-    //(startStroke == strokes.length)) return;
 
+async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
 	var fullRedraw = false;//keep track if this call started a full redraw to unset pleaseRedrawEverything flag later.
 	if (pleaseRedrawEverything) {// erase everything and draw from start
         fullRedraw = true;
@@ -934,8 +896,8 @@ async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
         line_index = line_type_history[i][1]
         line_color = line_type_history[i][2]
         line_width = line_type_history[i][3]
-        line_opacity = null;
-        update_line_draw_settings(line_color, line_width)
+        line_opacity = line_type_history[i][4]
+        update_line_draw_settings(line_color, line_width, line_opacity)
         switch (line_type_history[i][0]) {
             case 'C'://Calligraphy
                 if(!arrays_of_calligraphy_points_deleted[line_index]){
@@ -951,13 +913,27 @@ async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
                 //take the 2 previous points in addition to current one at the start of the loop.
                 p2 = arrays_of_points[line_index][startPoint > 1 ? startPoint-2 : 0];
                 p3 = arrays_of_points[line_index][startPoint > 0 ? startPoint-1 : 0];
+                ctx.beginPath();
+                // Create a Path2D object to reuse
+                var path = new Path2D();
                 for(var j = startPoint; j < arrays_of_points[line_index].length; j++){
-                    nextPoint = j + 1;//track which point was last drawn so we can pick up where we left off on the next refresh.
+                    nextPoint = j + 1;
                     p1 = p2;
                     p2 = p3;
                     p3 = arrays_of_points[line_index][j];
-                    draw_path_at_some_point_async(p1[0],p1[1],p2[0],p2[1],p3[0],p3[1],p3[3]);
+                    path.moveTo((p1[0] + (p2[0] - p1[0]) / 2), (p1[1] + (p2[1] - p1[1])/ 2));
+                    path.quadraticCurveTo(p2[0], p2[1], (p2[0] + (p3[0] - p2[0]) / 2), (p2[1] + (p3[1] - p2[1])/ 2));
                 }
+
+                // Erase
+                var save = ctx.strokeStyle
+                switch_to_no_alpha(save)
+                ctx.globalCompositeOperation = "destination-out";
+                ctx.stroke(path);
+
+                switch_back_to_correct_alpha(save)
+                ctx.globalCompositeOperation = "source-over";
+                ctx.stroke(path);
                 break;
             case 'P'://Perfect Lines
                     if(arrays_of_points_deleted[line_index]){
@@ -1014,13 +990,12 @@ function pointerDownLine(e) {
 	else if ( drawingWithPressurePenOnly) { return; }
     if(!isPointerDown){
         event.preventDefault();
-        arrays_of_points.push([[
+        in_progress_points = [ ];
+        in_progress_points.push([[
 			e.offsetX,
 			e.offsetY,
             (e.pointerType[0] == 'p' && pressureSensitivity) ? e.pressure : 2,
 			(e.pointerType[0] == 'p' && pressureSensitivity) ? (1.0 + e.pressure * getPenColorAndWidthByIndex(activePenIndex)[1] * 2) : getPenColorAndWidthByIndex(activePenIndex)[1]]]);
-        var pen = getPenColorAndWidthByIndex(activePenIndex);
-        line_type_history.push([perfectFreehand? 'P' :'L' ,arrays_of_points.length-1, pen[0], pen[1], pen[2]]);//Add new Simple or Perfect line marker to shared history
         start_drawing();
     }
 }
@@ -1029,7 +1004,7 @@ function pointerMoveLine(e) {
 	if (!e.isPrimary || calligraphy || strokeDelete) { return; }
 	if (e.pointerType[0] != 'p' && drawingWithPressurePenOnly) { return; }
     if (isPointerDown) {
-        arrays_of_points[arrays_of_points.length-1].push([
+        in_progress_points.push([
 			e.offsetX,
 			e.offsetY,
             (e.pointerType[0] == 'p' && pressureSensitivity) ? e.pressure : 2,
@@ -1043,14 +1018,17 @@ function pointerUpLine(e) {
 	if (!e.isPrimary || calligraphy || strokeDelete) { return; }
 	if (e.pointerType[0] != 'p' && drawingWithPressurePenOnly) { return; }
     if (isPointerDown) {
-        arrays_of_points[arrays_of_points.length-1].push([
+        in_progress_points.push([
 			e.offsetX,
 			e.offsetY,
             (e.pointerType[0] == 'p' && pressureSensitivity) ? e.pressure : 2,
 			(e.pointerType[0] == 'p' && pressureSensitivity) ? (1.0 + e.pressure * getPenColorAndWidthByIndex(activePenIndex)[1] * 2) : getPenColorAndWidthByIndex(activePenIndex)[1]]);
     } 
+    var pen = getPenColorAndWidthByIndex(activePenIndex);
+    arrays_of_points.push([...in_progress_points])
+    line_type_history.push([perfectFreehand? 'P' :'L' ,arrays_of_points.length-1, pen[0], pen[1], pen[2]]);//Add new Simple or Perfect line marker to shared history
 	stop_drawing();
-    if(perfectFreehand) ts_redraw();
+    if(perfectFreehand) ts_redraw();//TODO dont need after switchover
 }
 
 var tempColor = ""; // The variable to change
@@ -1177,9 +1155,10 @@ function doLinesIntersect(line1, line2) {
 function pointerDownStrokeDelete(e) {
     wrapper.classList.add('nopointer');
     if (!e.isPrimary || !strokeDelete) { return; }
-    event.preventDefault();//don't paint anything when clicking on buttons, especially for undo to work
-    secondary_ctx.strokeStyle = "Red";
-    secondary_ctx.fillStyle = "Red";
+    event.preventDefault();
+    // Use solid red for delete mode, not transparent
+    secondary_ctx.strokeStyle = "rgba(255, 0, 0, 1)";
+    secondary_ctx.fillStyle = "rgba(255, 0, 0, 1)";
     secondary_ctx.lineWidth = 4;
     start_drawing();
 };
@@ -1439,12 +1418,22 @@ def ts_change_pen_width(pen_number):
         execute_js("if (typeof update_pen_settings === 'function') { update_pen_settings(); }")
 
 @slot()
-def ts_change_opacity():
-    global ts_opacity
-    value, accepted = QInputDialog.getDouble(mw, "AnkiDraw", "Enter the opacity (0 = transparent, 100 = opaque):", 100 * ts_opacity, 0, 100, 2)
+def ts_change_pen_opacity(pen_number):
+    """
+    Open opacity picker and set chosen opacity for the specified pen.
+    """
+    # Get current opacity from global variable
+    current_opacity = globals()[f"ts_pen{pen_number}_opacity"]
+    value, accepted = QInputDialog.getDouble(mw, "AnkiDraw", f"Enter the pen {pen_number} opacity (0-1):", current_opacity, 0, 1, 2)
+    
     if accepted:
-        ts_opacity = value / 100
-        execute_js("canvas.style.opacity = " + str(ts_opacity))
+        # Update the global variable
+        globals()[f"ts_pen{pen_number}_opacity"] = value
+        
+        # Reload the reviewer to apply the new opacity
+        execute_js(f"pen{pen_number}Opacity = '{value}';")
+        execute_js("if (typeof update_pen_settings === 'function') { update_pen_settings(); }")
+        execute_js("if (typeof ts_redraw === 'function') { ts_redraw(); }")
 
 class CustomDialog(QDialog):
     def __init__(self):
@@ -1587,16 +1576,6 @@ def ts_change_toolbar_settings():
         ts_switch()
 
 @slot()
-def ts_dots():
-    """
-    Switch dot conversion.
-    """
-    global ts_ConvertDotStrokes
-    ts_ConvertDotStrokes = not ts_ConvertDotStrokes
-    execute_js("convertDotStrokes = " + str(ts_ConvertDotStrokes).lower() + ";")
-    execute_js("if (typeof resize === 'function') { resize(); }")
-
-@slot()
 def ts_change_auto_hide_settings():
     """
     Switch auto hide toolbar setting.
@@ -1706,7 +1685,7 @@ def ts_setup_menu():
     """
     Initialize menu. 
     """
-    global ts_menu_switch, ts_menu_dots, ts_menu_auto_hide, ts_menu_auto_hide_pointer, ts_menu_small_default, ts_menu_zen_mode, ts_menu_follow, ts_menu_pressure
+    global ts_menu_switch, ts_menu_auto_hide, ts_menu_auto_hide_pointer, ts_menu_small_default, ts_menu_zen_mode, ts_menu_follow, ts_menu_pressure
 
     try:
         mw.addon_view_menu
@@ -1720,14 +1699,12 @@ def ts_setup_menu():
     # mw.addon_view_menu.addMenu(mw.ts_menu)
 
     ts_menu_switch = QAction("""&Enable Ankidraw""", mw, checkable=True)
-    ts_menu_dots = QAction("""Convert &dot strokes on PF mode""", mw, checkable=True)
     ts_menu_pressure = QAction("""Enable &pressure sensitivity""", mw, checkable=True)
     ts_menu_auto_hide = QAction("""Auto &hide toolbar when drawing""", mw, checkable=True)
     ts_menu_auto_hide_pointer = QAction("""Auto &hide pointer when drawing""", mw, checkable=True)
     ts_menu_follow = QAction("""&Follow when scrolling (faster on big cards)""", mw, checkable=True)
     ts_menu_small_default = QAction("""&Small Canvas by default""", mw, checkable=True)
     ts_menu_zen_mode = QAction("""Enable Zen Mode(hide toolbar until disabled)""", mw, checkable=True)
-    ts_menu_opacity = QAction("""Set pen &opacity""", mw)
     ts_toolbar_settings = QAction("""&Toolbar and canvas location settings""", mw)
 
     ts_toggle_seq = QKeySequence("Ctrl+r")
@@ -1753,8 +1730,17 @@ def ts_setup_menu():
     ts_pen_width_menu.addAction(ts_menu_pen3_width)
     ts_pen_width_menu.addAction(ts_menu_pen4_width)
 
+    ts_pen_opacity_menu = QMenu("Set pen 1-4 opacity", mw)
+    ts_menu_pen1_opacity = QAction("Set Pen 1 Opacity", mw)
+    ts_menu_pen2_opacity = QAction("Set Pen 2 Opacity", mw)
+    ts_menu_pen3_opacity = QAction("Set Pen 3 Opacity", mw)
+    ts_menu_pen4_opacity = QAction("Set Pen 4 Opacity", mw)
+    ts_pen_opacity_menu.addAction(ts_menu_pen1_opacity)
+    ts_pen_opacity_menu.addAction(ts_menu_pen2_opacity)
+    ts_pen_opacity_menu.addAction(ts_menu_pen3_opacity)
+    ts_pen_opacity_menu.addAction(ts_menu_pen4_opacity)
+
     mw.addon_view_menu.addAction(ts_menu_switch)
-    mw.addon_view_menu.addAction(ts_menu_dots)
     mw.addon_view_menu.addAction(ts_menu_pressure)
     mw.addon_view_menu.addAction(ts_menu_auto_hide)
     mw.addon_view_menu.addAction(ts_menu_auto_hide_pointer)
@@ -1763,7 +1749,7 @@ def ts_setup_menu():
     mw.addon_view_menu.addAction(ts_menu_zen_mode)
     mw.addon_view_menu.addMenu(ts_pen_color_menu)
     mw.addon_view_menu.addMenu(ts_pen_width_menu)
-    mw.addon_view_menu.addAction(ts_menu_opacity)
+    mw.addon_view_menu.addMenu(ts_pen_opacity_menu)
     mw.addon_view_menu.addAction(ts_toolbar_settings)
 
     ts_menu_pen1_color.triggered.connect(lambda: ts_change_pen_color(1))
@@ -1774,15 +1760,17 @@ def ts_setup_menu():
     ts_menu_pen2_width.triggered.connect(lambda: ts_change_pen_width(2))
     ts_menu_pen3_width.triggered.connect(lambda: ts_change_pen_width(3))
     ts_menu_pen4_width.triggered.connect(lambda: ts_change_pen_width(4))
+    ts_menu_pen1_opacity.triggered.connect(lambda: ts_change_pen_opacity(1))
+    ts_menu_pen2_opacity.triggered.connect(lambda: ts_change_pen_opacity(2))
+    ts_menu_pen3_opacity.triggered.connect(lambda: ts_change_pen_opacity(3))
+    ts_menu_pen4_opacity.triggered.connect(lambda: ts_change_pen_opacity(4))
     ts_menu_switch.triggered.connect(ts_switch)
-    ts_menu_dots.triggered.connect(ts_dots)
     ts_menu_pressure.triggered.connect(ts_change_pressure_sensitivity_settings)
     ts_menu_auto_hide.triggered.connect(ts_change_auto_hide_settings)
     ts_menu_auto_hide_pointer.triggered.connect(ts_change_auto_hide_pointer_settings)
     ts_menu_follow.triggered.connect(ts_change_follow_settings)
     ts_menu_small_default.triggered.connect(ts_change_small_default_settings)
     ts_menu_zen_mode.triggered.connect(ts_change_zen_mode_settings)
-    ts_menu_opacity.triggered.connect(ts_change_opacity)
     ts_toolbar_settings.triggered.connect(ts_change_toolbar_settings)
 
 #

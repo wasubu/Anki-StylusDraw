@@ -947,6 +947,10 @@ async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
         startPoint = 0;
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 	}
+    for (let index = line_type_history.length-1; index >=0; index--) {
+        const element = line_type_history[index];
+        if(element[0]=='X')if(index>startLine)index = startLine
+    }
     for(var i = startLine; i < line_type_history.length; i++){ //Draw
         line_index = line_type_history[i][1]
         line_color = line_type_history[i][2]
@@ -1006,6 +1010,8 @@ async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
                     ctx.fill(path);
                 break;
             case 'D'://Delete Stroke Lines
+                break;
+            case 'X'://Clear Screen
                 break;
             default://how did you get here??
                 break;

@@ -176,7 +176,7 @@ def blackboard_html():
         </button>
 
         <button class="active" title="Clean canvas (. dot)"
-              onclick="clear_canvas();" >
+              onclick="add_clear_marker();" >
         <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M4 7h16"></path><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12"></path><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"></path><path d="M10 12l4 4m0 -4l-4 4"></path></svg>
 
         <button id="ts_switch_fullscreen_button" class="active" title="Toggle fullscreen canvas(Alt + b)"
@@ -886,13 +886,25 @@ function clear_canvas()
 	ts_clear();
 }
 
+function add_clear_marker()
+{
+	//don't continue to put points into an empty array(pointermove) if clearing while drawing on the canvas
+	stop_drawing();
+    if(lineHistory.length && lineHistory[lineHistory.length-1].type != 'X')add_action_to_history({ type: 'X'})
+	ts_clear();
+}
+
+function add_action_to_history(action){
+    ts_undo_button.className = "active"
+    lineHistory.push(action)
+}
+
 function stop_drawing() {
 	isPointerDown = false;
 	drawingWithPressurePenOnly = false;
 }
 
 function start_drawing() {
-    ts_undo_button.className = "active"
     isPointerDown = true;
 }
 
@@ -940,9 +952,9 @@ async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
         startPoint = 0;
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 	}
-    for (let index = lineHistory.length-1; index > 0; index--) {
-        if(lineHistory[index].type == 'X'){
-            if(index>startLine)index = startLine
+    for (let index = lineHistory.length-1; index > 0; index--) {//go thrught the history in reverse
+        if(lineHistory[index].type == 'X'){// the first clear we find is where we should start from 
+            if(index>startLine)startLine = index // if it's later than what we intend to draw
             break;
         }
     }
@@ -1130,7 +1142,7 @@ function pointerUpLine(e) {
             (e.pointerType[0] == 'p' && pressureSensitivity) ? e.pressure : 2,
 			(e.pointerType[0] == 'p' && pressureSensitivity) ? (1.0 + e.pressure * currentAction.width * 2) : currentAction.width]);
 
-        lineHistory.push(currentAction)
+        add_action_to_history(currentAction)
 
         if(perfectFreehand){
             const box = calculateClearBox(currentAction.points);
@@ -1194,7 +1206,7 @@ document.addEventListener('keyup', function(e) {
     // }
     // /
     if (e.key === ".") {
-        clear_canvas();
+        add_clear_marker();
     }
 	// ,
     if (e.key === ",") {
@@ -1324,7 +1336,7 @@ function finishDelete(){
     }
     if(marked_lines.length){
         currentAction.deletedList = marked_lines;//add list of lines which were deleted to the list
-        lineHistory.push(currentAction);
+        add_action_to_history(currentAction);
     }
     currentAction = {};// clear the array on pointer up so it doesnt enter new lines when clicking on buttons
     secondary_ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);//clear the guide line in second canvas
@@ -1457,7 +1469,7 @@ function pointerUpCaligraphy(e) {
     stop_drawing();
     if (!e.isPrimary || !calligraphy || !currentAction.points || !currentAction.points.length) { return; }
     
-    lineHistory.push(currentAction);
+    add_action_to_history(currentAction)
     currentAction = {};// clear the array on pointer up so it doesnt enter new lines when clicking on buttons
     secondary_ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);//clear the guide line in second canvas
 };

@@ -442,7 +442,6 @@ var ts_switch_pen3_button_path = document.querySelector('#ts_switch_pen3_button 
 var ts_switch_pen4_button_path = document.querySelector('#ts_switch_pen4_button > svg > path');
 
 // Arrays to save point values from strokes
-var in_progress_points = [ ]; // For simple lines being drawn
 var arrays_of_points = [ ];
 var arrays_of_calligraphy_points = [ ];
 var arrays_of_points_deleted = [ ];//sparse array of indexes to mark whether an specific stroke is deleted
@@ -450,6 +449,17 @@ var arrays_of_calligraphy_points_deleted = [ ];//sparse array of indexes to mark
 var stroke_delete_list = [ ];//array of array of objects{array_of_x_deleted, index}
 var line_type_history = [ ];
 var perfect_cache = [ ];
+
+// Current stroke in progress
+var currentAction = {
+    points: [],
+    color: '',
+    width: '',
+    opacity: '',
+    visible: true,
+    type: null, // 'simple', 'perfect', or 'calligraphy'
+    isComplete: false
+};
 
 var index = 0;
 
@@ -1036,10 +1046,11 @@ async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
     pleaseRedrawEverything = false;
 	fullRedraw = false;
     nextPoint = strokes.length == 0 ? 0 : nextPoint;//reset next point if out of lines
-        if(fullClear){// start again from 0.
-            nextLine = 0;
-            fullClear = false;
-        }
+
+    if(fullClear){// start again from 0.
+        nextLine = 0;
+        fullClear = false;
+    }
 	}
 }
 
@@ -1077,20 +1088,27 @@ function pointerDownLine(e) {
     var pen = getPenColorAndWidthByIndex(activePenIndex);
     if(!isPointerDown){
         event.preventDefault();
-        in_progress_points = [ ];
-        in_progress_points.push([
+        currentAction = {
+            points: [],
+            color: pen[0],
+            width: pen[1],
+            opacity: pen[2],
+            visible: true,
+            type: perfectFreehand ? 'P' : 'L', // 'simple', 'perfect', or 'calligraphy'
+        };
+        currentAction.points.push([
 			e.offsetX,
 			e.offsetY,
             (e.pointerType[0] == 'p' && pressureSensitivity) ? e.pressure : 2,//set pressure for perfect draw
-			(e.pointerType[0] == 'p' && pressureSensitivity) ? (1.0 + e.pressure * pen[1] * 2) : pen[1]]);//set pressure for simple lines
+			(e.pointerType[0] == 'p' && pressureSensitivity) ? (1.0 + e.pressure * currentAction.width * 2) : currentAction.width]);//set pressure for simple lines
         if(perfectFreehand){
-            const box = calculateClearBox(in_progress_points);
+            const box = calculateClearBox(currentAction.points);
             secondary_ctx.clearRect(box.x, box.y, box.width, box.height);
-            var path = new Path2D(getFreeDrawSvgPath(in_progress_points, pen[1],true)) 
+            var path = new Path2D(getFreeDrawSvgPath(currentAction.points, currentAction.width, true)) 
             secondary_ctx.fill(path)
         }
         else{
-            draw_secondary_path_at_some_point_async(in_progress_points[0][0],in_progress_points[0][1],in_progress_points[0][0],in_progress_points[0][1],in_progress_points[0][0],in_progress_points[0][1],in_progress_points[0][3])
+            draw_secondary_path_at_some_point_async(currentAction.points[0][0],currentAction.points[0][1],currentAction.points[0][0],currentAction.points[0][1],currentAction.points[0][0],currentAction.points[0][1],currentAction.points[0][3])
         }
         start_drawing();
     }
@@ -1101,22 +1119,22 @@ function pointerMoveLine(e) {
 	if (e.pointerType[0] != 'p' && drawingWithPressurePenOnly) { return; }
     var pen = getPenColorAndWidthByIndex(activePenIndex);
     if (isPointerDown) {
-        in_progress_points.push([
+        currentAction.points.push([
 			e.offsetX,
 			e.offsetY,
             (e.pointerType[0] == 'p' && pressureSensitivity) ? e.pressure : 2,
-			(e.pointerType[0] == 'p' && pressureSensitivity) ? (1.0 + e.pressure * pen[1] * 2) : pen[1]]);
+			(e.pointerType[0] == 'p' && pressureSensitivity) ? (1.0 + e.pressure * currentAction.width * 2) : currentAction.width]);
         if(perfectFreehand){
-            const box = calculateClearBox(in_progress_points);
+            const box = calculateClearBox(currentAction.points);
             secondary_ctx.clearRect(box.x, box.y, box.width, box.height);
-            var path = new Path2D(getFreeDrawSvgPath(in_progress_points, pen[1],true)) 
+            var path = new Path2D(getFreeDrawSvgPath(currentAction.points, currentAction.width, true)) 
             secondary_ctx.fill(path)
         }
         else{
-            p1 = in_progress_points.length > 2 ? in_progress_points.length-3 : 0;
-            p2 = in_progress_points.length > 1 ? in_progress_points.length-2 : 0;
-            p3 = in_progress_points.length - 1;
-            draw_secondary_path_at_some_point_async(in_progress_points[p1][0],in_progress_points[p1][1],in_progress_points[p2][0],in_progress_points[p2][1],in_progress_points[p3][0],in_progress_points[p3][1],in_progress_points[p3][3])
+            p1 = currentAction.points.length > 2 ? currentAction.points.length-3 : 0;
+            p2 = currentAction.points.length > 1 ? currentAction.points.length-2 : 0;
+            p3 = currentAction.points.length - 1;
+            draw_secondary_path_at_some_point_async(currentAction.points[p1][0],currentAction.points[p1][1],currentAction.points[p2][0],currentAction.points[p2][1],currentAction.points[p3][0],currentAction.points[p3][1],currentAction.points[p3][3])
         }
     }
 }
@@ -1128,25 +1146,25 @@ function pointerUpLine(e) {
 	if (e.pointerType[0] != 'p' && drawingWithPressurePenOnly) { return; }
     var pen = getPenColorAndWidthByIndex(activePenIndex);
     if (isPointerDown) {
-        in_progress_points.push([
+        currentAction.points.push([
 			e.offsetX,
 			e.offsetY,
             (e.pointerType[0] == 'p' && pressureSensitivity) ? e.pressure : 2,
-			(e.pointerType[0] == 'p' && pressureSensitivity) ? (1.0 + e.pressure * pen[1] * 2) : pen[1]]);
+			(e.pointerType[0] == 'p' && pressureSensitivity) ? (1.0 + e.pressure * currentAction.width * 2) : currentAction.width]);
 
-        arrays_of_points.push([...in_progress_points])
-        line_type_history.push([perfectFreehand ? 'P' : 'L' , arrays_of_points.length-1, pen[0], pen[1], pen[2]]);//Add new Simple or Perfect line marker to shared history
+        arrays_of_points.push(currentAction.points)
+        line_type_history.push([currentAction.type ,arrays_of_points.length-1, currentAction.color, currentAction.width, currentAction.opacity]);//Add new Simple or Perfect line marker to shared history
         if(perfectFreehand){
-            const box = calculateClearBox(in_progress_points);
+            const box = calculateClearBox(currentAction.points);
             secondary_ctx.clearRect(box.x, box.y, box.width, box.height);
-            var path = new Path2D(getFreeDrawSvgPath(in_progress_points, pen[1],true)) 
+            var path = new Path2D(getFreeDrawSvgPath(currentAction.points, currentAction.width,true)) 
             secondary_ctx.fill(path)
         }
         else{
-            p1 = in_progress_points.length > 2 ? in_progress_points.length-3 : 0;
-            p2 = in_progress_points.length > 1 ? in_progress_points.length-2 : 0;
-            p3 = in_progress_points.length - 1;
-            draw_secondary_path_at_some_point_async(in_progress_points[p1][0],in_progress_points[p1][1],in_progress_points[p2][0],in_progress_points[p2][1],in_progress_points[p3][0],in_progress_points[p3][1],in_progress_points[p3][3])
+            p1 = currentAction.points.length > 2 ? currentAction.points.length-3 : 0;
+            p2 = currentAction.points.length > 1 ? currentAction.points.length-2 : 0;
+            p3 = currentAction.points.length - 1;
+            draw_secondary_path_at_some_point_async(currentAction.points[p1][0],currentAction.points[p1][1],currentAction.points[p2][0],currentAction.points[p2][1],currentAction.points[p3][0],currentAction.points[p3][1],currentAction.points[p3][3])
         }
         secondary_ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);//clear the guide line in second canvas
     } 
@@ -1281,9 +1299,18 @@ function pointerDownStrokeDelete(e) {
     if (!e.isPrimary || !strokeDelete) { return; }
     event.preventDefault();
     // Use solid red for delete mode, not transparent
-    secondary_ctx.strokeStyle = "rgba(255, 0, 0, 1)";
-    secondary_ctx.fillStyle = "rgba(255, 0, 0, 1)";
-    secondary_ctx.lineWidth = 4;
+    var pen = getPenColorAndWidthByIndex(activePenIndex);
+    currentAction = {
+        points: [],
+        color: "rgba(255, 0, 0, 1)",
+        width: 4,
+        opacity: '1',
+        visible: true,
+        type: 'D', // 'simple', 'perfect', or 'calligraphy'
+    };
+    secondary_ctx.strokeStyle = secondary_ctx.fillStyle = currentAction.color;
+    secondary_ctx.lineWidth = currentAction.width;
+
     start_drawing();
 };
 
@@ -1291,24 +1318,24 @@ function pointerMoveStrokeDelete(e) {
     if (!e.isPrimary || !strokeDelete) { return; }
     if(isPointerDown) {
         var mousePos = [e.offsetX, e.offsetY];
-        if(currentPath.length != 0) {
-            if(getDist(mousePos,currentPath[currentPath.length-1])>=MIN_MOUSE_DIST)
-                currentPath.push(mousePos);
+        if(currentAction.points.length != 0) {
+            if(getDist(mousePos,currentAction.points[currentAction.points.length-1])>=MIN_MOUSE_DIST)
+                currentAction.points.push(mousePos);
             secondary_ctx.lineWidth = 4;
             drawCurrentPath();
         } else
-            currentPath.push(mousePos);
+            currentAction.points.push(mousePos);
     } 
 };
 
 function finishDelete(){
-    if (!strokeDelete || !currentPath.length) { return; }
+    if (!strokeDelete || !currentAction.points || !currentAction.points.length) { return; }
     stop_drawing();
     var pen = getPenColorAndWidthByIndex(activePenIndex)
     secondary_ctx.strokeStyle = pen[0] // active pen Color;
     secondary_ctx.fillStyle = pen[0] //active pen Color;
     secondary_ctx.lineWidth = pen[1] //active pen Color;
-    points = currentPath;
+    points = currentAction.points;
     lineDeleted = false;
     marked_lines = []
     for(var i = 0; i< arrays_of_points.length; i++){
@@ -1329,7 +1356,7 @@ function finishDelete(){
         stroke_delete_list.push(marked_lines);//add list of lines which were deleted to the list
         line_type_history.push(['D',stroke_delete_list.length-1]);//Add new Deleted line marker to shared history
     }
-    currentPath = [];// clear the array on pointer up so it doesnt enter new lines when clicking on buttons
+    currentAction = {};// clear the array on pointer up so it doesnt enter new lines when clicking on buttons
     secondary_ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);//clear the guide line in second canvas
     ts_redraw()
 }
@@ -1337,7 +1364,7 @@ function finishDelete(){
 function pointerUpStrokeDelete(e) {
     wrapper.classList.remove('nopointer');
     stop_drawing();
-    if (!e.isPrimary || !strokeDelete || !currentPath.length) { return; }
+    if (!e.isPrimary || !strokeDelete || !currentAction.points || !currentAction.points.length) { return; }
     finishDelete();
 };
 
@@ -1419,25 +1446,12 @@ SQUARE_SIZE = 300;
     
 //--- variables ---//
 strokes = [];
-points = [];
-lines = [];
-currentPath = [];
-errPoint = [];
-//use shared isPointerDown instead
-//mouseDown = false;
-
-// // share update function with pressure drawing so they don't clearRect eachother
-// function update() {
-//     ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
-//     for(var i = 0; i<strokes.length; i++)
-//         strokes[i].draw(WEIGHT,ctx);
-// }
 
 function drawCurrentPath() {
     secondary_ctx.beginPath();
-    secondary_ctx.moveTo(currentPath[0][0],currentPath[0][1]);
-    for(var i = 1; i<currentPath.length; i++) {
-        secondary_ctx.lineTo(currentPath[i][0],currentPath[i][1]);
+    secondary_ctx.moveTo(currentAction.points[0][0],currentAction.points[0][1]);
+    for(var i = 1; i<currentAction.points.length; i++) {
+        secondary_ctx.lineTo(currentAction.points[i][0],currentAction.points[i][1]);
     } 
     secondary_ctx.stroke();
 }
@@ -1446,6 +1460,15 @@ function pointerDownCaligraphy(e) {
     wrapper.classList.add('nopointer');
     if (!e.isPrimary || !calligraphy) { return; }
     event.preventDefault();//don't paint anything when clicking on buttons, especially for undo to work
+    var pen = getPenColorAndWidthByIndex(activePenIndex);
+    currentAction = {
+        points: [],
+        color: pen[0],
+        width: pen[1],
+        opacity: pen[2],
+        visible: true,
+        type: 'C', // 'simple', 'perfect', or 'calligraphy'
+    };
     start_drawing();
 };
 
@@ -1453,44 +1476,29 @@ function pointerMoveCaligraphy(e) {
     if (!e.isPrimary || !calligraphy) { return; }
     if(isPointerDown) {
         var mousePos = [e.offsetX, e.offsetY];
-        if(currentPath.length != 0) {
-            if(getDist(mousePos,currentPath[currentPath.length-1])>=MIN_MOUSE_DIST)
-                currentPath.push(mousePos);
+        if(currentAction.points.length != 0) {
+            if(getDist(mousePos,currentAction.points[currentAction.points.length-1])>=MIN_MOUSE_DIST)
+                currentAction.points.push(mousePos);
             drawCurrentPath();
         } else
-            currentPath.push(mousePos);
+            currentAction.points.push(mousePos);
     } 
 };
 
 function pointerUpCaligraphy(e) {
     wrapper.classList.remove('nopointer');
     stop_drawing();
-    if (!e.isPrimary || !calligraphy || !currentPath.length) { return; }
-    points = currentPath;
+    if (!e.isPrimary || !calligraphy || !currentAction.points || !currentAction.points.length) { return; }
     
-    var curves = fitStroke(points);
+    var curves = fitStroke(currentAction.points);
     var pen = getPenColorAndWidthByIndex(activePenIndex);
-    arrays_of_calligraphy_points.push(points);
-    line_type_history.push(['C',arrays_of_calligraphy_points.length-1, pen[0], pen[1], pen[2]]);//Add new Caligragraphy line marker to shared history
+    arrays_of_calligraphy_points.push(currentAction.points);
+    line_type_history.push([currentAction.type, arrays_of_calligraphy_points.length-1, currentAction.color, currentAction.width, currentAction.opacity]);//Add new Caligragraphy line marker to shared history
     strokes.push(new Stroke(curves));
     
-    currentPath = [];// clear the array on pointer up so it doesnt enter new lines when clicking on buttons
+    currentAction = {};// clear the array on pointer up so it doesnt enter new lines when clicking on buttons
     secondary_ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);//clear the guide line in second canvas
 };
-
-// // handled in ts_undo()
-// keydown = function(event) {
-//     var k = event.keyCode;
-//     console.log(k);
-//     if(k==68) {
-//         strokes.pop();
-//     }
-//     update();
-// };
-//
-//window.addEventListener("keydown",keydown,true);
-//
-//update();
 </script>
 """
 

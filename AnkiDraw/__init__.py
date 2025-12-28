@@ -1182,6 +1182,7 @@ function pointerUpLineText(e) {
         font: '20px Arial'//TODO add font selection
         //TODO add text writing toggle button
         //TODO make text stroke deletable
+        //TODO adjust text spacing and cursor based on font size
     };
     textBox.focus()
 };
@@ -1370,8 +1371,10 @@ document.addEventListener('keyup', function(e) {
         exit_stroke_delete_mode();
     }
 });
-// TODO chinese mode?[]
-// TODO save draw info in cards
+// TODO chinese mode?
+// TODO save draw info in cards, no need to save redos
+// TODO make clear per side of card by marking which items have been cleared
+// TODO add merging of front into back for correct behaviour with saving draw info
 document.addEventListener('keyup', function(e) {
     // alt + z
     if ((e.keyCode == 90 || e.key == "z") && e.altKey) {

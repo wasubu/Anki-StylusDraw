@@ -78,168 +78,6 @@ saved_value_defaults = {
     'ts_pen3_opacity': 0.5,
     'ts_pen4_opacity': 0.7,
 }
-def execute_js(code):
-    web_object = mw.reviewer.web
-    web_object.eval(code)
-
-
-# from aqt import mw
-# from aqt.qt import QKeySequence, QShortcut, Qt
-# from aqt.qt import QObject, QEvent, Qt
-
-# def setup_universal_keyboard_interceptor():
-#     """Setup universal keyboard interceptor that deactivates shortcuts and sends keys to JS"""
-    
-#     # FIRST: Disable or change all existing shortcuts
-#     print("=== STEP 1: Disabling existing shortcuts ===")
-#     mwShortcuts = mw.findChildren(QShortcut)
-#     from aqt.qt import sip
-#     # Store original shortcuts for possible restoration
-#     mw._original_shortcuts = {}
-#     mw._original_stateShortcuts = mw.stateShortcuts
-#     mw.stateShortcuts = []
-#     for qs in mw._original_stateShortcuts:
-#             sip.delete(qs)  # type: ignore
-#     for shortcut in mwShortcuts:
-#         current_key = shortcut.key().toString()
-#         if current_key:  # Only if it has a key binding
-#             # Store original
-#             mw._original_shortcuts[id(shortcut)] = {
-#                 'key': current_key,
-#                 'enabled': shortcut.isEnabled()
-#             }
-            
-#             # Disable the shortcut
-#             shortcut.setEnabled(False)
-#             print(f"Disabled shortcut: '{current_key}'")
-    
-#     print(f"Disabled {len(mw._original_shortcuts)} existing shortcuts")
-    
-#     # SECOND: Create our own interceptors for all keys
-#     print("\n=== STEP 2: Creating keyboard interceptors ===")
-    
-#     # Store all created interceptors
-#     mw._keyboard_interceptors = []
-    
-#     import string
-    
-#     def create_interceptor_for_key(key_str):
-#         """Create a Qt shortcut that intercepts a specific key"""
-#         shortcut = QShortcut(QKeySequence(key_str), mw)
-        
-#         def handler():
-#             # Get the actual key that was pressed (handle case)
-#             actual_key = key_str
-            
-#             # Prepare JavaScript to send a proper keydown event
-#             js_code = f"""
-#             // Create and dispatch keyboard event for: {key_str}
-#             try {{
-#                 let keyName = '{key_str}'.toLowerCase();
-#                 let code = 'Key' + '{key_str}'.toUpperCase();
-#                 let keyCode = '{key_str}'.toUpperCase().charCodeAt(0);
-                
-#                 // Handle special cases
-#                 switch('{key_str}'.toLowerCase()) {{
-#                     case 'space':
-#                         keyName = ' ';
-#                         code = 'Space';
-#                         keyCode = 32;
-#                         break;
-#                     case 'return':
-#                     case 'enter':
-#                         keyName = 'Enter';
-#                         code = 'Enter';
-#                         keyCode = 13;
-#                         break;
-#                     case 'tab':
-#                         keyName = 'Tab';
-#                         code = 'Tab';
-#                         keyCode = 9;
-#                         break;
-#                     case 'escape':
-#                     case 'esc':
-#                         keyName = 'Escape';
-#                         code = 'Escape';
-#                         keyCode = 27;
-#                         break;
-#                     case 'backspace':
-#                         keyName = 'Backspace';
-#                         code = 'Backspace';
-#                         keyCode = 8;
-#                         break;
-#                     case 'delete':
-#                         keyName = 'Delete';
-#                         code = 'Delete';
-#                         keyCode = 46;
-#                         break;
-#                 }}
-                
-#                 // Create the keyboard event
-#                 const event = new KeyboardEvent('keydown', {{
-#                     key: keyName,
-#                     code: code,
-#                     keyCode: keyCode,
-#                     charCode: keyCode,
-#                     which: keyCode,
-#                     bubbles: true,
-#                     cancelable: true,
-#                     composed: true
-#                 }});
-                
-#                 // Dispatch to document
-#                 document.dispatchEvent(event);
-                
-#                 // Also try to dispatch to active element
-#                 if (document.activeElement && document.activeElement !== document.body) {{
-#                     document.activeElement.dispatchEvent(event);
-#                 }}
-                
-#                 console.log('Key intercepted and sent to JavaScript:', keyName);
-#             }} catch (error) {{
-#                 console.error('Error sending key to JS:', error);
-#             }}
-#             """
-            
-#             # Execute the JavaScript
-#             execute_js(js_code)
-        
-#         shortcut.activated.connect(handler)
-#         mw._keyboard_interceptors.append(shortcut)
-        
-#         return shortcut
-    
-#     # Create interceptors for all letters A-Z
-#     for char in string.ascii_uppercase:
-#         create_interceptor_for_key(char)
-    
-#     # Create interceptors for common keys
-#     common_keys = [
-#         'Space', 'Return', 'Enter', 'Tab', 'Escape', 
-#         'Backspace', 'Delete', 'Home', 'End', 
-#         'PageUp', 'PageDown', 'Left', 'Right', 'Up', 'Down'
-#     ]
-    
-#     for key in common_keys:
-#         create_interceptor_for_key(key)
-    
-#     # Create interceptors for digits 0-9
-#     for digit in string.digits:
-#         create_interceptor_for_key(digit)
-    
-#     # Create interceptors for common symbols (you can expand this list)
-#     symbols = [
-#         ',', '.', ';', ':', '!', '?', '"', "'", 
-#         '(', ')', '[', ']', '{', '}', '<', '>', 
-#         '/', '\\', '|', '`', '~', '@', '#', '$', 
-#         '%', '^', '&', '*', '-', '_', '=', '+'
-#     ]
-    
-#     for symbol in symbols:
-#         create_interceptor_for_key(symbol)
-    
-#     print(f"Created {len(mw._keyboard_interceptors)} keyboard interceptors")
-# setup_universal_keyboard_interceptor()
 
 # Create the variables in the global scope
 for key, value in saved_value_defaults.items():
@@ -307,9 +145,10 @@ def clear_blackboard():
 def blackboard_html():
     return u"""
 <div id="canvas_wrapper">
+    <textarea id="AnkiDrawTextBox" style="width: 0;height: 0;opacity: 0;"></textarea>
     <canvas id="secondary_canvas" width="100" height="100" ></canvas>
     <canvas id="main_canvas" width="100" height="100"></canvas>
-
+    
     <div id="pencil_button_bar">
         <!-- SVG icons from https://github.com/tabler/tabler-icons/ -->
         <button id="ts_visibility_button" class="active" title="Toggle visiblity (, comma)"
@@ -587,6 +426,7 @@ function hexToRgba(hex, opacity) {
 // HTML references
 var canvas = document.getElementById('main_canvas');
 var wrapper = document.getElementById('canvas_wrapper');
+var textBox = document.getElementById('AnkiDrawTextBox');
 var optionBar = document.getElementById('pencil_button_bar');
 var ts_undo_button = document.getElementById('ts_undo_button');
 var ts_redo_button = document.getElementById('ts_redo_button');
@@ -683,9 +523,11 @@ function reset_drawing_modes()
     ts_kanji_button.className = '';
     ts_perfect_freehand_button.className = '';
     ts_stroke_delete_button.className = '';
+    ts_stroke_delete_button.className = '';
     calligraphy = false;
     perfectFreehand = false;
     strokeDelete = false
+    textWriting = false;
     ts_redraw()
 }
 
@@ -721,14 +563,13 @@ function switch_calligraphy_mode()
 function switch_text_writing_mode()
 {
     stop_drawing();
-    
-
     // In toggle mode, toggle the textWriting boolean
     temp = !textWriting;
     reset_drawing_modes()
     textWriting = temp;
     if(textWriting)
     {
+        textBox.focus()
         ts_stroke_delete_button.className = 'active';
     }
     else{
@@ -834,7 +675,8 @@ secondary_canvas.addEventListener("pointerdown", pointerDownStrokeDelete);
 secondary_canvas.addEventListener("pointermove", pointerMoveStrokeDelete);
 window.addEventListener("pointerup", pointerUpStrokeDelete);
 
-window.addEventListener("pointerup", pointerUpLineText);
+// window.addEventListener("pointerup", pointerUpLineText);
+window.addEventListener("pointerdown", pointerUpLineText);
 
 function resize() {
     
@@ -1010,11 +852,7 @@ function ts_undo(){
     {
         ts_undo_button.className = ""
     }
-    else
-    {
-        ts_redraw()
-    }
-    
+    ts_redraw()
 }
 function ts_redo() {
     stop_drawing();
@@ -1086,6 +924,7 @@ function reset_history(){
 }
 
 function stop_drawing() {
+    submitCurrentText()
 	isPointerDown = false;
 	drawingWithPressurePenOnly = false;
 }
@@ -1214,6 +1053,15 @@ async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
                 break;
             case 'X'://Clear Screen
                 break;
+            case 'T'://Write Text
+                var save = ctx.strokeStyle
+                switch_to_no_alpha(save)
+                ctx.globalCompositeOperation = "destination-out";
+                drawTextFromAction(ctx, actionToDraw)
+                switch_back_to_correct_alpha(save)
+                ctx.globalCompositeOperation = "source-over";
+                drawTextFromAction(ctx, actionToDraw)
+                break;
             default://how did you get here??
                 break;
         }
@@ -1270,12 +1118,29 @@ function calculateClearBox(pointsArray) {
         height: (maxY - minY) + padding * 2
     };
 }
+function drawCursor(x, y) {
+    secondary_ctx.beginPath();
+    secondary_ctx.moveTo(x, y);
+    secondary_ctx.lineTo(x, y + 20);
+    secondary_ctx.strokeStyle = 'red';
+    secondary_ctx.lineWidth = 2;
+    secondary_ctx.stroke();
+}
+
+function startCursorBlink() {
+    clearInterval(cursorBlinkInterval);
+    drawTextOnCanvas()
+    cursorBlinkInterval = setInterval(() => {
+        cursorVisible = !cursorVisible;
+        drawTextOnCanvas();
+    }, 500);
+}
 
 function submitCurrentText() {
     if (currentAction && currentAction.text && currentAction.text.length > 0) {
         // Save the text entry
-        
-        
+        add_action_to_history(currentAction)
+        currentAction = null
         // Create and save box around the text
         // const box = createBoxAroundText(currentEntry);
         // boxes.push(box);
@@ -1284,10 +1149,12 @@ function submitCurrentText() {
         // updateStaticCanvas();
         
         // Clear current entry
-        currentAction.text = "";
-        add_action_to_history(currentAction)
+        textBox.blur()
+        secondary_ctx.clearRect(0, 0, canvas.width, canvas.height);
+        currentAction = null;
         
     }
+    textBox.value = ""
 }
 
 function pointerUpLineText(e) {
@@ -1312,57 +1179,75 @@ function pointerUpLineText(e) {
         opacity: pen[2],
         visible: true,
         type: 'T', // 'text'
+        font: '20px Arial'//TODO add font selection
+        //TODO add text writing toggle button
+        //TODO make text stroke deletable
     };
-    
-    cursorVisible = true;
+    textBox.focus()
 };
-
-// Handle keyboard input
-document.addEventListener('keydown', (e) => {
+// Prevent arrow key cursor movement
+textBox.addEventListener('keydown', e => {
+    if(!textWriting)return
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+        e.preventDefault();
+    }
+    else if (e.key === 'Escape') {
+        submitCurrentText();
+    }
+    else if (e.altKey){
+        e.preventDefault()
+    }
+});
+textBox.addEventListener('input', () => {
     if (!currentAction || !textWriting) return;
     
-    e.preventDefault();
-    
-    if (e.key === 'Backspace') {
-        currentAction.text = currentAction.text.slice(0, -1);
-    } else if (e.key === 'Enter') {
-        submitCurrentText();
-        currentAction = {
-            x: currentAction.x,
-            y: currentAction.y + 30,
-            text: ""
-        };
-    } else if (e.key === 'Escape') {
-        submitCurrentText();
-        currentAction = null;
-    } else if (e.key.length === 1) {
-        currentAction.text += e.key;
-    }
-    
+    currentAction.text = textBox.value
     needsRedraw = true;
-    drawCanvas();
+    drawTextOnCanvas();
     // updateStatus();
 });
 
-function drawCanvas() {
+textBox.addEventListener('focus', () => startCursorBlink());
+textBox.addEventListener('blur', () => {clearInterval(cursorBlinkInterval); submitCurrentText();});
+// Prevent canvas click from stealing focus
+canvas_wrapper.addEventListener('mousedown', e => {
+    if(!textWriting)return;
+    e.preventDefault(); // Prevent focus loss    
+    // Ensure textarea stays focused
+    textBox.focus();
+});
+function drawTextOnCanvas() {
     if(!textWriting)return;
     secondary_ctx.clearRect(0, 0, canvas.width, canvas.height);
         
     // Draw current entry text (dynamic)
     if (currentAction) {
-        secondary_ctx.font = '20px Arial';
-        secondary_ctx.fillStyle = 'black';
-        secondary_ctx.textBaseline = 'top';
-        secondary_ctx.fillText(currentAction.text, currentAction.x, currentAction.y);
+        var lines = drawTextFromAction(secondary_ctx, currentAction)
         
         // Draw cursor if visible
         if (cursorVisible) {
-            const textWidth = secondary_ctx.measureText(currentAction.text).width;
-            // drawCursor(currentAction.x + textWidth, currentAction.y);
+            const textWidth = lines ? secondary_ctx.measureText(lines[lines.length-1]).width + 1 : 0;
+            var currentLine = lines ? lines.length-1 : 0
+            drawCursor(currentAction.x + textWidth, currentAction.y + currentLine * 25);
         }
     }
-        
 }
+
+function drawTextFromAction(paramCtx, action){
+    var lines = null
+    if (action && action.type == 'T') {
+        if(action.text){
+            var lines = action.text.split(/(?<!\\\\)\\n/);//this is an escaped string as javascript is passed as a string into the python code
+            for(var i = 0; i< lines.length; i++){
+                paramCtx.font = action.font;
+                paramCtx.textBaseline = 'top';
+                paramCtx.fillText(lines[i], action.x , action.y + i*25);
+            }
+        }
+    }
+    return lines
+}
+
 function pointerDownLine(e) {
     wrapper.classList.add('nopointer');
 	if (!e.isPrimary || calligraphy || strokeDelete || textWriting) { return; }
@@ -1467,6 +1352,7 @@ function updateVariable() {
 
 document.addEventListener('keydown', function(e) {
     // For hold mode, start deleting when shift+d is pressed
+    if(textWriting)return;
     if ((e.keyCode == 68 || e.key == "d") && e.shiftKey) {
         e.preventDefault();
         // Only activate if this is NOT a repeat event (first press)
@@ -1484,7 +1370,6 @@ document.addEventListener('keyup', function(e) {
         exit_stroke_delete_mode();
     }
 });
-// TODO add text typing
 // TODO chinese mode?[]
 // TODO save draw info in cards
 document.addEventListener('keyup', function(e) {
@@ -1508,7 +1393,6 @@ document.addEventListener('keyup', function(e) {
     }
     if ((e.keyCode == 84 || e.key == "t") && e.altKey) {
         e.preventDefault();
-        // finishDelete()
         switch_text_writing_mode();
     }
     if ((e.keyCode == 68 || e.key == "d") && e.altKey) {

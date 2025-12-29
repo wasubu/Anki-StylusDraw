@@ -33,7 +33,7 @@ from anki.lang import _
 from anki.hooks import addHook
 
 from aqt.qt import QAction, QMenu, QColorDialog, QMessageBox, QInputDialog, QLabel,\
-   QPushButton, QDialog, QVBoxLayout, QComboBox, QHBoxLayout, QSpinBox, QCheckBox
+   QPushButton, QDialog, QVBoxLayout, QComboBox, QHBoxLayout, QSpinBox, QCheckBox, QFontDialog, QFont
 from aqt.qt import QKeySequence,QColor
 from aqt.qt import pyqtSlot as slot
 
@@ -45,7 +45,6 @@ with open(file.with_name("PerfectFreehand.js"), encoding="utf8") as f:
     perfect_freehand_js = f.read()
 # This declarations are there only to be sure that in case of troubles
 # with "profileLoaded" hook everything will work.
-
 
 ts_profile_loaded = False
 
@@ -77,6 +76,10 @@ saved_value_defaults = {
     'ts_pen2_opacity': 0.9,
     'ts_pen3_opacity': 0.5,
     'ts_pen4_opacity': 0.7,
+    'ts_font_family': "Arial",
+    'ts_font_size': 20,
+    'ts_font_bold': False,
+    'ts_font_italic': False,
 }
 
 # Create the variables in the global scope
@@ -378,6 +381,10 @@ var pen1Opacity = """ + str(ts_pen1_opacity) + """;
 var pen2Opacity = """ + str(ts_pen2_opacity) + """;
 var pen3Opacity = """ + str(ts_pen3_opacity) + """;
 var pen4Opacity = """ + str(ts_pen4_opacity) + """;
+var fontFamily = """ + "\'" + str(ts_font_family) + "\'" + """;
+var fontSize = """ + str(ts_font_size) + """;
+var fontBold = """ + str(ts_font_bold).lower() + """;
+var fontItalic = """ + str(ts_font_italic).lower() + """;
 var activePenIndex = 0;
 var convertDotStrokes = true
 
@@ -1121,7 +1128,7 @@ function calculateClearBox(pointsArray) {
 function drawCursor(x, y) {
     secondary_ctx.beginPath();
     secondary_ctx.moveTo(x, y);
-    secondary_ctx.lineTo(x, y + 20);
+    secondary_ctx.lineTo(x, y + fontSize);
     secondary_ctx.strokeStyle = 'red';
     secondary_ctx.lineWidth = 2;
     secondary_ctx.stroke();
@@ -1179,10 +1186,12 @@ function pointerUpLineText(e) {
         opacity: pen[2],
         visible: true,
         type: 'T', // 'text'
-        font: '20px Arial'//TODO add font selection
+        fontFamily: fontFamily,
+        fontSize: fontSize,
+        fontBold: fontBold,
+        fontItalic: fontItalic
         //TODO add text writing toggle button
         //TODO make text stroke deletable
-        //TODO adjust text spacing and cursor based on font size
     };
     textBox.focus()
 };
@@ -1217,6 +1226,26 @@ canvas_wrapper.addEventListener('mousedown', e => {
     // Ensure textarea stays focused
     textBox.focus();
 });
+
+// Helper functions for calculations
+function calculateLineHeight(fontSize) {
+    // Line height = font size + appropriate spacing
+    // For small fonts: add more relative spacing
+    // For large fonts: add less relative spacing
+    if (fontSize < 12) {
+        return fontSize + 8; // More spacing for small text
+    } else if (fontSize < 24) {
+        return fontSize + 6; // Medium spacing
+    } else {
+        return fontSize + 4; // Less spacing for large text
+    }
+}
+
+function calculateCursorOffset(fontSize) {
+    // Cursor offset should be proportional to font size
+    return Math.max(1, Math.floor(fontSize / 15));
+}
+
 function drawTextOnCanvas() {
     if(!textWriting)return;
     secondary_ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1227,9 +1256,9 @@ function drawTextOnCanvas() {
         
         // Draw cursor if visible
         if (cursorVisible) {
-            const textWidth = lines ? secondary_ctx.measureText(lines[lines.length-1]).width + 1 : 0;
+            const textWidth = lines ? secondary_ctx.measureText(lines[lines.length-1]).width + calculateCursorOffset(currentAction.fontSize) : 0;
             var currentLine = lines ? lines.length-1 : 0
-            drawCursor(currentAction.x + textWidth, currentAction.y + currentLine * 25);
+            drawCursor(currentAction.x + textWidth, currentAction.y + currentLine * calculateLineHeight(currentAction.fontSize));
         }
     }
 }
@@ -1240,9 +1269,15 @@ function drawTextFromAction(paramCtx, action){
         if(action.text){
             var lines = action.text.split(/(?<!\\\\)\\n/);//this is an escaped string as javascript is passed as a string into the python code
             for(var i = 0; i< lines.length; i++){
+                var fontString = "";
+                if (action.fontBold) fontString += "bold ";
+                if (action.fontItalic) fontString += "italic ";
+                fontString += action.fontSize + "px " + action.fontFamily;
+                
+                paramCtx.font = fontString;
                 paramCtx.font = action.font;
                 paramCtx.textBaseline = 'top';
-                paramCtx.fillText(lines[i], action.x , action.y + i*25);
+                paramCtx.fillText(lines[i], action.x , action.y + i * calculateLineHeight(action.fontSize));
             }
         }
     }
@@ -1375,6 +1410,8 @@ document.addEventListener('keyup', function(e) {
 // TODO save draw info in cards, no need to save redos
 // TODO make clear per side of card by marking which items have been cleared
 // TODO add merging of front into back for correct behaviour with saving draw info
+// TODO add toggle to not apply front card to the back one
+// TODO clear history button?
 document.addEventListener('keyup', function(e) {
     // alt + z
     if ((e.keyCode == 90 || e.key == "z") && e.altKey) {
@@ -1676,6 +1713,34 @@ def custom(*args, **kwargs):
     )
     return output
 mw.reviewer.revHtml = custom
+
+
+@slot()
+def ts_change_font_settings():
+    """
+    Open Qt's font dialog and set chosen font.
+    """
+    global ts_font_family, ts_font_size, ts_font_bold, ts_font_italic
+    current_font = QFont()
+    current_font.setFamily(ts_font_family)
+    current_font.setPointSize(ts_font_size)
+    current_font.setBold(ts_font_bold)
+    current_font.setItalic(ts_font_italic)
+    
+    font, ok = QFontDialog.getFont(current_font, mw)
+    
+    if ok:
+        ts_font_family = font.family()
+        ts_font_size = font.pointSize()
+        ts_font_bold = font.bold()
+        ts_font_italic = font.italic()
+        
+        execute_js(f"fontFamily = '{ts_font_family}';")
+        execute_js(f"fontSize = {ts_font_size};")
+        execute_js(f"fontBold = {str(ts_font_bold).lower()};")
+        execute_js(f"fontItalic = {str(ts_font_italic).lower()};")
+        
+        execute_js("if (typeof ts_redraw === 'function') { ts_redraw(); }")
 
 @slot()
 def ts_change_pen_color(pen_number):
@@ -2000,6 +2065,7 @@ def ts_setup_menu():
     ts_menu_small_default = QAction("""&Small Canvas by default (speedup draw)""", mw, checkable=True)
     ts_menu_zen_mode = QAction("""Enable Zen Mode(hide toolbar until disabled)""", mw, checkable=True)
     ts_toolbar_settings = QAction("""&Toolbar and canvas location settings""", mw)
+    ts_font_settings = QAction("""Select &Font for text writing""", mw)    
 
     ts_toggle_seq = QKeySequence("Ctrl+r")
     ts_menu_switch.setShortcut(ts_toggle_seq)
@@ -2045,6 +2111,7 @@ def ts_setup_menu():
     mw.addon_view_menu.addMenu(ts_pen_width_menu)
     mw.addon_view_menu.addMenu(ts_pen_opacity_menu)
     mw.addon_view_menu.addAction(ts_toolbar_settings)
+    mw.addon_view_menu.addAction(ts_font_settings)
 
     ts_menu_pen1_color.triggered.connect(lambda: ts_change_pen_color(1))
     ts_menu_pen2_color.triggered.connect(lambda: ts_change_pen_color(2))
@@ -2066,6 +2133,7 @@ def ts_setup_menu():
     ts_menu_small_default.triggered.connect(ts_change_small_default_settings)
     ts_menu_zen_mode.triggered.connect(ts_change_zen_mode_settings)
     ts_toolbar_settings.triggered.connect(ts_change_toolbar_settings)
+    ts_font_settings.triggered.connect(ts_change_font_settings)
 
 #
 # ONLOAD SECTION

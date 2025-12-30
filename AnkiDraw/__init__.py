@@ -910,7 +910,7 @@ function ts_redo() {
     if (redoStack.length < 1) return;
     
     var redoAction = redoStack.pop();
-    add_action_to_history(redoAction)
+    readd_action_to_history(redoAction)
     ts_undo_button.className = "active";
     switch (redoAction.type) {
         case 'C'://Calligraphy
@@ -918,7 +918,7 @@ function ts_redo() {
         case 'L'://Simple Lines
             break;
         case 'D'://Delete Stroke Lines
-            poppedAction.deletedList.forEach( deletedIndex => { lineHistory[deletedIndex].visible = false } )
+            redoAction.deletedList.forEach( deletedIndex => { lineHistory[deletedIndex].visible = false } )
             break;
         case 'X'://Delete Stroke Lines
             break;
@@ -959,6 +959,13 @@ function add_clear_marker()
 }
 
 function add_action_to_history(action){
+    ts_undo_button.className = "active"
+    lineHistory.push(action)
+    currentAction = {}
+    reset_redo()
+}
+
+function readd_action_to_history(action){
     ts_undo_button.className = "active"
     lineHistory.push(action)
     currentAction = {}
@@ -1580,6 +1587,7 @@ function finishDelete(){
     }
     if(marked_lines.length){
         currentAction.deletedList = marked_lines;//add list of lines which were deleted to the list
+        currentAction.type = 'D'
         add_action_to_history(currentAction);
     }
     secondary_ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);//clear the guide line in second canvas

@@ -169,6 +169,10 @@ def blackboard_html():
         <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M3 21v-4a4 4 0 1 1 4 4h-4"></path><path d="M21 3a16 16 0 0 0 -12.8 10.2"></path><path d="M21 3a16 16 0 0 1 -10.2 12.8"></path><path d="M10.6 9a9 9 0 0 1 4.4 4.4"></path></svg>
         </button>
 
+        <button id="ts_text_button" title="Toggle text writing (Alt + t)"
+              onclick="switch_text_writing_mode();" >
+        <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M19 10h-14" />  <path d="M5 6h14" />  <path d="M14 14h-9" />  <path d="M5 18h6" />  <path d="M18 15v6" />  <path d="M15 18h6" /></svg>        </button>
+
         <button id="ts_stroke_delete_button" title="Stroke Delete (Alt + d), hold shift+d"
             onclick="switch_stroke_delete_mode()" >
         <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M3 3l18 18" /><path d="M19 20h-10.5l-4.21 -4.3a1 1 0 0 1 0 -1.41l5 -4.993m2.009 -2.01l3 -3a1 1 0 0 1 1.41 0l5 5a1 1 0 0 1 0 1.41c-1.417 1.431 -2.406 2.432 -2.97 3m-2.02 2.043l-4.211 4.256" /><path d="M18 13.3l-6.3 -6.3" /></svg>
@@ -193,22 +197,22 @@ def blackboard_html():
 
         <button id="ts_switch_pen1_button" class="active" title="Switch to Pen 1 (Alt + 1)"
               onclick="activate_pen1();" >
-        <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M18.333 2c1.96 0 3.56 1.537 3.662 3.472l.005 .195v12.666c0 1.96 -1.537 3.56 -3.472 3.662l-.195 .005h-12.666a3.667 3.667 0 0 1 -3.662 -3.472l-.005 -.195v-12.666c0 -1.96 1.537 -3.56 3.472 -3.662l.195 -.005h12.666zm-5.339 5.886c-.083 -.777 -1.008 -1.16 -1.617 -.67l-.084 .077l-2 2l-.083 .094a1 1 0 0 0 0 1.226l.083 .094l.094 .083a1 1 0 0 0 1.226 0l.094 -.083l.293 -.293v5.586l.007 .117a1 1 0 0 0 1.986 0l.007 -.117v-8l-.006 -.114z" /></svg>
+        <svg stroke="currentColor" fill="none" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M18.333 2c1.96 0 3.56 1.537 3.662 3.472l.005 .195v12.666c0 1.96 -1.537 3.56 -3.472 3.662l-.195 .005h-12.666a3.667 3.667 0 0 1 -3.662 -3.472l-.005 -.195v-12.666c0 -1.96 1.537 -3.56 3.472 -3.662l.195 -.005h12.666zm-5.339 5.886c-.083 -.777 -1.008 -1.16 -1.617 -.67l-.084 .077l-2 2l-.083 .094a1 1 0 0 0 0 1.226l.083 .094l.094 .083a1 1 0 0 0 1.226 0l.094 -.083l.293 -.293v5.586l.007 .117a1 1 0 0 0 1.986 0l.007 -.117v-8l-.006 -.114z" /></svg>
         </button>
 
         <button id="ts_switch_pen2_button" class="active" title="Switch to Pen 2 (Alt + 2)"
               onclick="activate_pen2();" >
-        <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M18.333 2c1.96 0 3.56 1.537 3.662 3.472l.005 .195v12.666c0 1.96 -1.537 3.56 -3.472 3.662l-.195 .005h-12.666a3.667 3.667 0 0 1 -3.662 -3.472l-.005 -.195v-12.666c0 -1.96 1.537 -3.56 3.472 -3.662l.195 -.005h12.666zm-5.333 5h-3l-.117 .007a1 1 0 0 0 0 1.986l.117 .007h3v2h-2l-.15 .005a2 2 0 0 0 -1.844 1.838l-.006 .157v2l.005 .15a2 2 0 0 0 1.838 1.844l.157 .006h3l.117 -.007a1 1 0 0 0 0 -1.986l-.117 -.007h-3v-2h2l.15 -.005a2 2 0 0 0 1.844 -1.838l.006 -.157v-2l-.005 -.15a2 2 0 0 0 -1.838 -1.844l-.157 -.006z" /></path></svg>
+        <svg stroke="currentColor" fill="none" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M18.333 2c1.96 0 3.56 1.537 3.662 3.472l.005 .195v12.666c0 1.96 -1.537 3.56 -3.472 3.662l-.195 .005h-12.666a3.667 3.667 0 0 1 -3.662 -3.472l-.005 -.195v-12.666c0 -1.96 1.537 -3.56 3.472 -3.662l.195 -.005h12.666zm-5.333 5h-3l-.117 .007a1 1 0 0 0 0 1.986l.117 .007h3v2h-2l-.15 .005a2 2 0 0 0 -1.844 1.838l-.006 .157v2l.005 .15a2 2 0 0 0 1.838 1.844l.157 .006h3l.117 -.007a1 1 0 0 0 0 -1.986l-.117 -.007h-3v-2h2l.15 -.005a2 2 0 0 0 1.844 -1.838l.006 -.157v-2l-.005 -.15a2 2 0 0 0 -1.838 -1.844l-.157 -.006z" /></path></svg>
         </button>
 
         <button id="ts_switch_pen3_button" class="active" title="Switch to Pen 3 (Alt + 3)"
               onclick="activate_pen3();" >
-        <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M18.333 2c1.96 0 3.56 1.537 3.662 3.472l.005 .195v12.666c0 1.96 -1.537 3.56 -3.472 3.662l-.195 .005h-12.666a3.667 3.667 0 0 1 -3.662 -3.472l-.005 -.195v-12.666c0 -1.96 1.537 -3.56 3.472 -3.662l.195 -.005h12.666zm-5.333 5h-2l-.15 .005a2 2 0 0 0 -1.85 1.995a1 1 0 0 0 1.974 .23l.02 -.113l.006 -.117h2v2h-2l-.133 .007c-1.111 .12 -1.154 1.73 -.128 1.965l.128 .021l.133 .007h2v2h-2l-.007 -.117a1 1 0 0 0 -1.993 .117a2 2 0 0 0 1.85 1.995l.15 .005h2l.15 -.005a2 2 0 0 0 1.844 -1.838l.006 -.157v-2l-.005 -.15a1.988 1.988 0 0 0 -.17 -.667l-.075 -.152l-.019 -.032l.02 -.03a2.01 2.01 0 0 0 .242 -.795l.007 -.174v-2l-.005 -.15a2 2 0 0 0 -1.838 -1.844l-.157 -.006z" /></svg>
+        <svg stroke="currentColor" fill="none" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M18.333 2c1.96 0 3.56 1.537 3.662 3.472l.005 .195v12.666c0 1.96 -1.537 3.56 -3.472 3.662l-.195 .005h-12.666a3.667 3.667 0 0 1 -3.662 -3.472l-.005 -.195v-12.666c0 -1.96 1.537 -3.56 3.472 -3.662l.195 -.005h12.666zm-5.333 5h-2l-.15 .005a2 2 0 0 0 -1.85 1.995a1 1 0 0 0 1.974 .23l.02 -.113l.006 -.117h2v2h-2l-.133 .007c-1.111 .12 -1.154 1.73 -.128 1.965l.128 .021l.133 .007h2v2h-2l-.007 -.117a1 1 0 0 0 -1.993 .117a2 2 0 0 0 1.85 1.995l.15 .005h2l.15 -.005a2 2 0 0 0 1.844 -1.838l.006 -.157v-2l-.005 -.15a1.988 1.988 0 0 0 -.17 -.667l-.075 -.152l-.019 -.032l.02 -.03a2.01 2.01 0 0 0 .242 -.795l.007 -.174v-2l-.005 -.15a2 2 0 0 0 -1.838 -1.844l-.157 -.006z" /></svg>
         </button>
 
         <button id="ts_switch_pen4_button" class="active" title="Switch to Pen 4 (Alt + 4)"
               onclick="activate_pen4();" >
-        <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M18.333 2c1.96 0 3.56 1.537 3.662 3.472l.005 .195v12.666c0 1.96 -1.537 3.56 -3.472 3.662l-.195 .005h-12.666a3.667 3.667 0 0 1 -3.662 -3.472l-.005 -.195v-12.666c0 -1.96 1.537 -3.56 3.472 -3.662l.195 -.005h12.666zm-4.333 5a1 1 0 0 0 -.993 .883l-.007 .117v3h-2v-3l-.007 -.117a1 1 0 0 0 -1.986 0l-.007 .117v3l.005 .15a2 2 0 0 0 1.838 1.844l.157 .006h2v3l.007 .117a1 1 0 0 0 1.986 0l.007 -.117v-8l-.007 -.117a1 1 0 0 0 -.993 -.883z" /></svg>
+        <svg stroke="currentColor" fill="none" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M18.333 2c1.96 0 3.56 1.537 3.662 3.472l.005 .195v12.666c0 1.96 -1.537 3.56 -3.472 3.662l-.195 .005h-12.666a3.667 3.667 0 0 1 -3.662 -3.472l-.005 -.195v-12.666c0 -1.96 1.537 -3.56 3.472 -3.662l.195 -.005h12.666zm-4.333 5a1 1 0 0 0 -.993 .883l-.007 .117v3h-2v-3l-.007 -.117a1 1 0 0 0 -1.986 0l-.007 .117v3l.005 .15a2 2 0 0 0 1.838 1.844l.157 .006h2v3l.007 .117a1 1 0 0 0 1.986 0l.007 -.117v-8l-.007 -.117a1 1 0 0 0 -.993 -.883z" /></svg>
         </button>
 
         <button id="ts_switch_pen4_button" class="active" title="Play Sound on card again (R)"
@@ -442,6 +446,7 @@ var secondary_canvas = document.getElementById('secondary_canvas');
 var secondary_ctx = secondary_canvas.getContext('2d');
 var ts_visibility_button = document.getElementById('ts_visibility_button');
 var ts_kanji_button = document.getElementById('ts_kanji_button');
+var ts_text_button = document.getElementById('ts_text_button');
 var ts_perfect_freehand_button = document.getElementById('ts_perfect_freehand_button');
 var ts_stroke_delete_button = document.getElementById('ts_stroke_delete_button');
 var ts_switch_fullscreen_button = document.getElementById('ts_switch_fullscreen_button');
@@ -456,7 +461,7 @@ var ts_switch_pen3_button_path = document.querySelector('#ts_switch_pen3_button 
 var ts_switch_pen4_button_path = document.querySelector('#ts_switch_pen4_button > svg > path');
 
 // Arrays to save point values from strokes
-var perfect_cache = [ ];
+var stroke_cache = [ ];
 var lineHistory = [ ] // contains history of currentAction Items, defined below
 var redoStack = [ ]
 
@@ -530,11 +535,45 @@ function reset_drawing_modes()
     ts_kanji_button.className = '';
     ts_perfect_freehand_button.className = '';
     ts_stroke_delete_button.className = '';
-    ts_stroke_delete_button.className = '';
+    ts_text_button.className = '';
     calligraphy = false;
     perfectFreehand = false;
     strokeDelete = false
     textWriting = false;
+    reset_to_main_pen_settings()
+    ts_redraw()
+}
+
+ts_kanji_button_class = '';
+ts_perfect_freehand_button_class = '';
+ts_stroke_delete_button_class = '';
+ts_text_button_class = '';
+calligraphy_activated = false;
+perfectFreehand_activated = false;
+strokeDelete_activated = false
+textWriting_activated = false;
+
+function save_drawing_modes_for_delete()
+{
+    ts_kanji_button_class = ts_kanji_button.className;
+    ts_perfect_freehand_button_class = ts_perfect_freehand_button.className;
+    ts_text_button_class = ts_text_button.className;
+    calligraphy_activated = calligraphy
+    perfectFreehand_activated = perfectFreehand
+    textWriting_activated = textWriting
+    reset_to_main_pen_settings()
+    ts_redraw()
+}
+
+function restore_drawing_modes_for_delete()
+{
+    ts_kanji_button.className = ts_kanji_button_class
+    ts_perfect_freehand_button.className = ts_perfect_freehand_button_class
+    ts_text_button.className = ts_text_button_class
+    calligraphy = calligraphy_activated
+    perfectFreehand = perfectFreehand_activated
+    textWriting = textWriting_activated
+    reset_to_main_pen_settings()
     ts_redraw()
 }
 
@@ -577,54 +616,56 @@ function switch_text_writing_mode()
     if(textWriting)
     {
         textBox.focus()
-        ts_stroke_delete_button.className = 'active';
+        ts_text_button.className = 'active';
     }
     else{
-        ts_stroke_delete_button.className = '';
+        textBox.blur()
+        ts_text_button.className = '';
     }
 }
 function switch_stroke_delete_mode()
 {
     stop_drawing();
     
-
     // In toggle mode, toggle the strokeDelete boolean
-    temp = !strokeDelete;
-    reset_drawing_modes()
-    strokeDelete = temp;
+    strokeDelete = !strokeDelete;
     if(strokeDelete || isDeleting)
     {
+        save_drawing_modes_for_delete()
         ts_stroke_delete_button.className = 'active';
     }
     else{
+        restore_drawing_modes_for_delete()
         ts_stroke_delete_button.className = '';
     }
 }
 function enter_stroke_delete_mode()
 {
     stop_drawing();
-    reset_drawing_modes()
     strokeDelete = true;
     isDeleting = true;
     if(strokeDelete || isDeleting)
     {
+        save_drawing_modes_for_delete()
         ts_stroke_delete_button.className = 'active';
     }
     else{
+        restore_drawing_modes_for_delete()
         ts_stroke_delete_button.className = '';
     }
 }
 function exit_stroke_delete_mode()
 {
     stop_drawing();
-    reset_drawing_modes()
     strokeDelete = false;
     isDeleting = false
     if(strokeDelete || isDeleting)
     {
+        save_drawing_modes_for_delete()
         ts_stroke_delete_button.className = 'active';
     }
     else{
+        restore_drawing_modes_for_delete()
         ts_stroke_delete_button.className = '';
     }
 }
@@ -682,8 +723,8 @@ secondary_canvas.addEventListener("pointerdown", pointerDownStrokeDelete);
 secondary_canvas.addEventListener("pointermove", pointerMoveStrokeDelete);
 window.addEventListener("pointerup", pointerUpStrokeDelete);
 
-// window.addEventListener("pointerup", pointerUpLineText);
-window.addEventListener("pointerdown", pointerUpLineText);
+window.addEventListener("pointerup", pointerDownLineText);
+window.addEventListener("pointerdown", pointerDownLineText);
 
 function resize() {
     
@@ -784,7 +825,7 @@ function update_pen_settings(){
         
     } 
     var pencolorNoAlpha = pen[0].replace(/[\d\.]+\)$/g, '1)');
-    if(secondary_ctx.strokeStyle != pen[0]){
+    if(secondary_ctx.strokeStyle != pencolorNoAlpha){
         secondary_ctx.strokeStyle = secondary_ctx.fillStyle = pencolorNoAlpha;
     }
     
@@ -808,7 +849,7 @@ function reset_to_main_pen_settings(){
         ctx.strokeStyle = ctx.fillStyle = pen[0]; // pen color
     } 
     var pencolorNoAlpha = pen[0].replace(/[\d\.]+\)$/g, '1)');
-    if(secondary_ctx.strokeStyle != pen[0]){
+    if(secondary_ctx.strokeStyle != pencolorNoAlpha){
         secondary_ctx.strokeStyle = secondary_ctx.fillStyle = pencolorNoAlpha;
     }
     
@@ -838,17 +879,20 @@ function ts_undo(){
         var poppedAction = lineHistory.pop()
         redoStack.push(poppedAction)
         ts_redo_button.className = "active";
+        stroke_cache[lineHistory.length] = null;
         switch (poppedAction.type) {
             case 'C'://Calligraphy
-                perfect_cache[lineHistory.length] = null;
                 break;
             case 'L'://Simple Lines
-                perfect_cache[lineHistory.length] = null;
+                break;
+            case 'P'://Perfect Lines
                 break;
             case 'D'://Delete Stroke Lines
                 poppedAction.deletedList.forEach( deletedIndex => { lineHistory[deletedIndex].visible = true } )
                 break;
-            case 'X'://Delete Stroke Lines
+            case 'X'://Clear actions
+                break;
+            case 'T'://Text Writing actions
                 break;
             default://how did you get here??
                 break;
@@ -917,6 +961,7 @@ function add_clear_marker()
 function add_action_to_history(action){
     ts_undo_button.className = "active"
     lineHistory.push(action)
+    currentAction = {}
 }
 
 function reset_redo(){
@@ -926,17 +971,19 @@ function reset_redo(){
 
 function reset_history(){
     lineHistory = [];
-    perfect_cache = [];
+    stroke_cache = [];
     ts_undo_button.className = "";
 }
 
 function stop_drawing() {
+    reset_to_main_pen_settings()
     submitCurrentText()
-	isPointerDown = false;
+
 	drawingWithPressurePenOnly = false;
 }
 
 function start_drawing() {
+    submitCurrentText()
     isPointerDown = true;
     reset_redo()
 }
@@ -944,20 +991,6 @@ function start_drawing() {
 function draw_last_line_segment() {
     window.requestAnimationFrame(draw_last_line_segment);
     draw_upto_latest_point_async(nextLine, nextPoint, nextStroke);
-
-    // Draw current entry text (dynamic)
-    // if (textWriting && currentAction && currentAction.type == 'T') {
-    //     ctx.font = '20px Arial';
-    //     ctx.fillStyle = 'black';
-    //     ctx.textBaseline = 'top';
-    //     ctx.fillText(currentAction.text, currentAction.x, currentAction.y);
-        
-    //     // Draw cursor if visible
-    //     if (cursorVisible) {
-    //         const textWidth = ctx.measureText(currentAction.text).width;
-    //         drawCursor(currentAction.x + textWidth, currentAction.y);
-    //     }
-    // }
 }
 
 var nextLine = 0;
@@ -966,11 +999,11 @@ var nextStroke = 0;
 var p1,p2,p3;
 
 function is_last_path_and_currently_drawn(i){
-    return (isPointerDown && lineHistory.length-1 <= i)//the path is complete unless its the last of the array and the pointer is still down
+    return (lineHistory.length-1 < i)//the path is complete unless its the last of the array and the pointer is still down
 }
 
 function all_drawing_finished(i){
-    return (!isPointerDown && lineHistory.length-1 >= i)//the path is complete unless its the last of the array and the pointer is still down
+    return (lineHistory.length-1 >= i)//the path is complete unless its the last of the array and the pointer is still down
 }
 
 async function draw_path_at_some_point_async(startX, startY, midX, midY, endX, endY, lineWidth) {
@@ -1015,8 +1048,8 @@ async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
         update_line_draw_settings(actionToDraw.color, actionToDraw.width, actionToDraw.opacity)
         switch (actionToDraw.type) {
             case 'C'://Calligraphy
-                    var calligraphyStroke = !perfect_cache[i] ? new Stroke(fitStroke(actionToDraw.points)) : perfect_cache[i]
-                    perfect_cache[i] = calligraphyStroke
+                    var calligraphyStroke = !stroke_cache[i] ? new Stroke(fitStroke(actionToDraw.points)) : stroke_cache[i]
+                    stroke_cache[i] = calligraphyStroke
                     calligraphyStroke.draw(actionToDraw.width, ctx);
                 break;
             case 'L'://Simple Lines
@@ -1041,12 +1074,8 @@ async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
                 
                 break;
             case 'P'://Perfect Lines
-                var path = !perfect_cache[i] ? new Path2D(
-                            getFreeDrawSvgPath(
-                                actionToDraw.points,
-                                actionToDraw.width,
-                                true)) : perfect_cache[i]
-                perfect_cache[i] = path
+                var path = !stroke_cache[i] ? new Path2D(getFreeDrawSvgPath(actionToDraw.points, actionToDraw.width, true)) : stroke_cache[i]
+                stroke_cache[i] = path
                 var save = ctx.strokeStyle
                 switch_to_no_alpha(save)
                 ctx.globalCompositeOperation = "destination-out";
@@ -1145,26 +1174,22 @@ function startCursorBlink() {
 
 function submitCurrentText() {
     if (currentAction && currentAction.text && currentAction.text.length > 0) {
-        // Save the text entry
-        add_action_to_history(currentAction)
-        currentAction = null
+
         // Create and save box around the text
         // const box = createBoxAroundText(currentEntry);
         // boxes.push(box);
-        
-        // // Update static canvas only once
-        // updateStaticCanvas();
+        // Save the text entry
+        add_action_to_history(currentAction)
         
         // Clear current entry
         textBox.blur()
-        secondary_ctx.clearRect(0, 0, canvas.width, canvas.height);
-        currentAction = null;
-        
+        secondary_ctx.clearRect(0, 0, canvas.width, canvas.height);   
     }
     textBox.value = ""
 }
 
-function pointerUpLineText(e) {
+
+function pointerDownLineText(e) {
     if (!e.isPrimary || !textWriting) { return; }
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
@@ -1190,7 +1215,6 @@ function pointerUpLineText(e) {
         fontSize: fontSize,
         fontBold: fontBold,
         fontItalic: fontItalic
-        //TODO add text writing toggle button
         //TODO make text stroke deletable
     };
     textBox.focus()
@@ -1220,7 +1244,7 @@ textBox.addEventListener('input', () => {
 textBox.addEventListener('focus', () => startCursorBlink());
 textBox.addEventListener('blur', () => {clearInterval(cursorBlinkInterval); submitCurrentText();});
 // Prevent canvas click from stealing focus
-canvas_wrapper.addEventListener('mousedown', e => {
+canvas_wrapper.addEventListener('pointerdown', e => {
     if(!textWriting)return;
     e.preventDefault(); // Prevent focus loss    
     // Ensure textarea stays focused
@@ -1356,8 +1380,6 @@ function pointerUpLine(e) {
             (e.pointerType[0] == 'p' && pressureSensitivity) ? e.pressure : 2,
 			(e.pointerType[0] == 'p' && pressureSensitivity) ? (1.0 + e.pressure * currentAction.width * 2) : currentAction.width]);
 
-        add_action_to_history(currentAction)
-
         if(perfectFreehand){
             const box = calculateClearBox(currentAction.points);
             secondary_ctx.clearRect(box.x, box.y, box.width, box.height);
@@ -1370,6 +1392,7 @@ function pointerUpLine(e) {
             p3 = currentAction.points.length - 1;
             draw_secondary_path_at_some_point_async(currentAction.points[p1][0],currentAction.points[p1][1],currentAction.points[p2][0],currentAction.points[p2][1],currentAction.points[p3][0],currentAction.points[p3][1],currentAction.points[p3][3])
         }
+        add_action_to_history(currentAction)
         secondary_ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);//clear the guide line in second canvas
     } 
 	stop_drawing();
@@ -1507,6 +1530,7 @@ function doLinesIntersect(line1, line2) {
 function pointerDownStrokeDelete(e) {
     wrapper.classList.add('nopointer');
     if (!e.isPrimary || !strokeDelete) { return; }
+    submitCurrentText()
     event.preventDefault();
     // Use solid red for delete mode, not transparent
     var pen = getPenColorAndWidthByIndex(activePenIndex);
@@ -1558,7 +1582,6 @@ function finishDelete(){
         currentAction.deletedList = marked_lines;//add list of lines which were deleted to the list
         add_action_to_history(currentAction);
     }
-    currentAction = {};// clear the array on pointer up so it doesnt enter new lines when clicking on buttons
     secondary_ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);//clear the guide line in second canvas
     ts_redraw()
 }
@@ -1690,7 +1713,6 @@ function pointerUpCaligraphy(e) {
     if (!e.isPrimary || !calligraphy || !currentAction.points || !currentAction.points.length) { return; }
     
     add_action_to_history(currentAction)
-    currentAction = {};// clear the array on pointer up so it doesnt enter new lines when clicking on buttons
     secondary_ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);//clear the guide line in second canvas
 };
 </script>

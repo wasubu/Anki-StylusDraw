@@ -978,7 +978,7 @@ function reset_history(){
 function stop_drawing() {
     reset_to_main_pen_settings()
     submitCurrentText()
-
+    isPointerDown = false;
 	drawingWithPressurePenOnly = false;
 }
 

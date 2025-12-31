@@ -464,13 +464,8 @@ var ts_switch_pen4_button_path = document.querySelector('#ts_switch_pen4_button 
 var stroke_cache = [ ];
 var lineHistory = [ ] // contains history of currentAction Items, defined below
 var redoStack = [ ]
-
-// Store all text inputs with their positions and boxes
-let textEntries = [];
-let boxes = [];
-let cursorVisible = true;
+let textCursorVisible = true;
 let cursorBlinkInterval;
-let needsRedraw = true;
 
 // Current stroke in progress
 var currentAction = {
@@ -1174,7 +1169,7 @@ function startCursorBlink() {
     clearInterval(cursorBlinkInterval);
     drawTextOnCanvas()
     cursorBlinkInterval = setInterval(() => {
-        cursorVisible = !cursorVisible;
+        textCursorVisible = !textCursorVisible;
         drawTextOnCanvas();
     }, 500);
 }
@@ -1319,7 +1314,6 @@ function submitCurrentText() {
 
         // Create and save box around the text
         currentAction.points = createBoxWithDiagonalPoints(currentAction);
-        // boxes.push(box);
         // Save the text entry
         add_action_to_history(currentAction)
         
@@ -1377,9 +1371,7 @@ textBox.addEventListener('input', () => {
     if (!currentAction || !textWriting) return;
     
     currentAction.text = textBox.value
-    needsRedraw = true;
     drawTextOnCanvas();
-    // updateStatus();
 });
 
 textBox.addEventListener('focus', () => startCursorBlink());
@@ -1420,7 +1412,7 @@ function drawTextOnCanvas() {
         var lines = drawTextFromAction(secondary_ctx, currentAction)
         
         // Draw cursor if visible
-        if (cursorVisible) {
+        if (textCursorVisible) {
             const textWidth = lines ? secondary_ctx.measureText(lines[lines.length-1]).width + calculateCursorOffset(currentAction.fontSize) : 0;
             var currentLine = lines ? lines.length-1 : 0
             drawCursor(currentAction.x + textWidth, currentAction.y + currentLine * calculateLineHeight(currentAction.fontSize));

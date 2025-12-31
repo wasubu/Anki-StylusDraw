@@ -739,6 +739,7 @@ function resize() {
     // Check size of page without canvas
     canvas_wrapper.style.display='none';
     canvas.style["border-style"] = "none";
+    secondary_canvas.style["border-style"] = "none";
     document.documentElement.style.setProperty('--canvas-bar-pt', '0px');
     document.documentElement.style.setProperty('--canvas-bar-pr', '0px');
     document.documentElement.style.setProperty('--canvas-bar-pb', 'unset');
@@ -1151,7 +1152,7 @@ function calculateClearBox(pointsArray) {
     });
     
     // Add some padding for line caps/width
-    const padding = 50;
+    const padding = 1;
     
     return {
         x: minX - padding,
@@ -1177,9 +1178,7 @@ function startCursorBlink() {
         drawTextOnCanvas();
     }, 500);
 }
-//TODO fix small canvas border on large canvas after switch
-//TODO fix bug perfect freehand lines thick after delete mode?
-//TODO fix bug with the first text not having a proper box around it
+
 function createBoxWithDiagonalPoints(action) {
     const lines = action.text.split(/(?<!\\\\)\\n/);
     const allBoxPoints = [];
@@ -1187,18 +1186,18 @@ function createBoxWithDiagonalPoints(action) {
     const padding = 1;
     const spacing = 8;
     const lineHeight = calculateLineHeight(action.fontSize);
-    
+
+    var fontString = "";
+    if (action.fontBold) fontString += "bold ";
+    if (action.fontItalic) fontString += "italic ";
+    fontString += action.fontSize + "px " + action.fontFamily;
+
+    ctx.font = fontString;
     let currentY = action.y;
     
     // Process each line separately
     for (let i = 0; i < lines.length; i++) {
         const lineText = lines[i];
-        
-        // Skip empty lines
-        // if (lineText.trim().length === 0) {
-        //     currentY += lineHeight;
-        //     continue;
-        // }
         
         const textWidth = ctx.measureText(lineText).width;
         
@@ -1441,7 +1440,6 @@ function drawTextFromAction(paramCtx, action){
                 fontString += action.fontSize + "px " + action.fontFamily;
                 
                 paramCtx.font = fontString;
-                paramCtx.font = action.font;
                 paramCtx.textBaseline = 'top';
                 paramCtx.fillText(lines[i], action.x , action.y + i * calculateLineHeight(action.fontSize));
             }

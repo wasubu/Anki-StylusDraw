@@ -49,9 +49,9 @@ BezierShape.prototype.draw = function(ctx) {
     ctx.closePath();
         // Erase
     var save = ctx.strokeStyle
-    update_line_draw_settings(get_no_alpha(save), ctx.lineWidth)
-    ctx.globalCompositeOperation = "destination-out";
-    ctx.fill(path);
+    // update_line_draw_settings(get_no_alpha(save), ctx.lineWidth)
+    // ctx.globalCompositeOperation = "destination-out";
+    // ctx.fill(path);
     update_line_draw_settings(get_no_alpha(save), ctx.lineWidth)
     ctx.globalCompositeOperation = "source-over";
     ctx.fill(path);
@@ -402,9 +402,9 @@ Bezier.prototype.drawPlain = function(ctx) {
 
         // Erase
         var save = ctx.strokeStyle
-        update_line_draw_settings(get_no_alpha(save), ctx.lineWidth)
-        ctx.globalCompositeOperation = "destination-out";
-        ctx.stroke(path);
+        // update_line_draw_settings(get_no_alpha(save), ctx.lineWidth)
+        // ctx.globalCompositeOperation = "destination-out";
+        // ctx.stroke(path);
         update_line_draw_settings(get_no_alpha(save), ctx.lineWidth)
         ctx.globalCompositeOperation = "source-over";
         ctx.stroke(path);
@@ -550,9 +550,9 @@ function drawBezier(curve,wid,wF,ctx) {
     path.closePath();
     // Erase
     var save = ctx.strokeStyle
-    update_line_draw_settings(get_no_alpha(save), ctx.lineWidth)
-    ctx.globalCompositeOperation = "destination-out";
-    ctx.fill(path);
+    // update_line_draw_settings(get_no_alpha(save), ctx.lineWidth)
+    // ctx.globalCompositeOperation = "destination-out";
+    // ctx.fill(path);
 
     update_line_draw_settings(get_no_alpha(save), ctx.lineWidth)
     ctx.globalCompositeOperation = "source-over";
@@ -833,9 +833,9 @@ Stroke.prototype.drawPlain = function(ctx) {
     }
     // Erase
     var save = ctx.strokeStyle
-    update_line_draw_settings(get_no_alpha(save), ctx.lineWidth)
-    ctx.globalCompositeOperation = "destination-out";
-    ctx.stroke(path);
+    // update_line_draw_settings(get_no_alpha(save), ctx.lineWidth)
+    // ctx.globalCompositeOperation = "destination-out";
+    // ctx.stroke(path);
 
     update_line_draw_settings(get_no_alpha(save), ctx.lineWidth)
     ctx.globalCompositeOperation = "source-over";

@@ -1066,10 +1066,10 @@ async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
                     p2 = p3;
                     p3 = actionToDraw.points[j];
                     var save = ctx.strokeStyle
-                    
-                    update_line_draw_settings(get_no_alpha(save), actionToDraw.width+100, actionToDraw.opacity)
-                    ctx.globalCompositeOperation = "destination-out";
-                    draw_path_at_some_point_async(p1[0],p1[1],p2[0],p2[1],p3[0],p3[1],p3[3]);
+                    //sadly this doesnt work well with windows, as it leaves circle outlines due to alpha blending, so abandon per stroke opacty dreams
+                    // update_line_draw_settings(get_no_alpha(save), actionToDraw.width, actionToDraw.opacity)
+                    // ctx.globalCompositeOperation = "destination-out";
+                    // draw_path_at_some_point_async(p1[0],p1[1],p2[0],p2[1],p3[0],p3[1],p3[3]);
 
                     update_line_draw_settings(get_no_alpha(save), actionToDraw.width, actionToDraw.opacity)
 
@@ -1082,9 +1082,9 @@ async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
                 var path = !stroke_cache[i] ? new Path2D(getFreeDrawSvgPath(actionToDraw.points, actionToDraw.width, true)) : stroke_cache[i]
                 stroke_cache[i] = path
                 var save = ctx.strokeStyle
-                update_line_draw_settings(get_no_alpha(save), actionToDraw.width, actionToDraw.opacity)
-                ctx.globalCompositeOperation = "destination-out";
-                ctx.fill(path);
+                // update_line_draw_settings(get_no_alpha(save), actionToDraw.width, actionToDraw.opacity)
+                // ctx.globalCompositeOperation = "destination-out";
+                // ctx.fill(path);
 
                 update_line_draw_settings(get_no_alpha(save), actionToDraw.width, actionToDraw.opacity)
                 ctx.globalCompositeOperation = "source-over";
@@ -1096,9 +1096,10 @@ async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
                 break;
             case 'T'://Write Text
                 var save = ctx.strokeStyle
-                update_line_draw_settings(get_no_alpha(save), actionToDraw.width, actionToDraw.opacity)
-                ctx.globalCompositeOperation = "destination-out";
-                drawTextFromAction(ctx, actionToDraw)
+                // update_line_draw_settings(get_no_alpha(save), actionToDraw.width, actionToDraw.opacity)
+                // ctx.globalCompositeOperation = "destination-out";
+                // drawTextFromAction(ctx, actionToDraw)
+
                 update_line_draw_settings(get_no_alpha(save), actionToDraw.width, actionToDraw.opacity)
                 ctx.globalCompositeOperation = "source-over";
                 drawTextFromAction(ctx, actionToDraw)

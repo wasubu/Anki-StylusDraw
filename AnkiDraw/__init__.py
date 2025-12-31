@@ -22,7 +22,7 @@ Important parts of Javascript code inspired by http://creativejs.com/tutorials/p
 """
 
 __addon_name__ = "AnkiDraw"
-__version__ = "1.6"
+__version__ = "1.7"
 
 from pathlib import Path
 
@@ -830,6 +830,7 @@ function update_pen_settings(){
     }
     
     if(secondary_canvas.style.opacity != pen[2]) secondary_canvas.style.opacity = pen[2]
+    if(canvas.style.opacity != pen[2]) canvas.style.opacity = pen[2]
     
     recolor_based_on_active_pen()
     ts_redraw()
@@ -854,24 +855,19 @@ function reset_to_main_pen_settings(){
     }
     
     if(secondary_canvas.style.opacity != pen[2]) secondary_canvas.style.opacity = pen[2]
+    if(canvas.style.opacity != pen[2]) canvas.style.opacity = pen[2]
     
 }
 
 function update_line_draw_settings(color, width, opacity){
     ctx.lineJoin = ctx.lineCap = 'round';
-    ctx.lineWidth = width;
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-}
-
-function switch_to_no_alpha(line_color){
-    var color = ctx.strokeStyle.replace(/[\d\.]+\)$/g, '1)');
+    if(ctx.lineWidth != width)ctx.lineWidth = width
     if(ctx.fillStyle != color)ctx.fillStyle = ctx.strokeStyle = color
 }
-function switch_back_to_correct_alpha(line_color){
-    if(ctx.fillStyle != line_color)ctx.fillStyle = ctx.strokeStyle = line_color
-}
 
+function get_no_alpha(line_color){
+    return ctx.strokeStyle.replace(/[\d\.]+\)$/g, '1)');
+}
 
 function ts_undo(){
 	stop_drawing();
@@ -972,7 +968,7 @@ function readd_action_to_history(action){
 }
 
 function reset_redo(){
-    redo_stack = [];
+    redoStack = [];
     ts_redo_button.className = "";
 }
 
@@ -1070,10 +1066,12 @@ async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
                     p2 = p3;
                     p3 = actionToDraw.points[j];
                     var save = ctx.strokeStyle
-                    switch_to_no_alpha(save)
+                    
+                    update_line_draw_settings(get_no_alpha(save), actionToDraw.width+100, actionToDraw.opacity)
                     ctx.globalCompositeOperation = "destination-out";
                     draw_path_at_some_point_async(p1[0],p1[1],p2[0],p2[1],p3[0],p3[1],p3[3]);
-                    switch_back_to_correct_alpha(save)
+
+                    update_line_draw_settings(get_no_alpha(save), actionToDraw.width, actionToDraw.opacity)
 
                     ctx.globalCompositeOperation = "source-over";
                     draw_path_at_some_point_async(p1[0],p1[1],p2[0],p2[1],p3[0],p3[1],p3[3]);
@@ -1084,11 +1082,11 @@ async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
                 var path = !stroke_cache[i] ? new Path2D(getFreeDrawSvgPath(actionToDraw.points, actionToDraw.width, true)) : stroke_cache[i]
                 stroke_cache[i] = path
                 var save = ctx.strokeStyle
-                switch_to_no_alpha(save)
+                update_line_draw_settings(get_no_alpha(save), actionToDraw.width, actionToDraw.opacity)
                 ctx.globalCompositeOperation = "destination-out";
                 ctx.fill(path);
 
-                switch_back_to_correct_alpha(save)
+                update_line_draw_settings(get_no_alpha(save), actionToDraw.width, actionToDraw.opacity)
                 ctx.globalCompositeOperation = "source-over";
                 ctx.fill(path);
                 break;
@@ -1098,10 +1096,10 @@ async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
                 break;
             case 'T'://Write Text
                 var save = ctx.strokeStyle
-                switch_to_no_alpha(save)
+                update_line_draw_settings(get_no_alpha(save), actionToDraw.width, actionToDraw.opacity)
                 ctx.globalCompositeOperation = "destination-out";
                 drawTextFromAction(ctx, actionToDraw)
-                switch_back_to_correct_alpha(save)
+                update_line_draw_settings(get_no_alpha(save), actionToDraw.width, actionToDraw.opacity)
                 ctx.globalCompositeOperation = "source-over";
                 drawTextFromAction(ctx, actionToDraw)
                 break;
@@ -1128,7 +1126,7 @@ async function draw_upto_latest_point_async(startLine, startPoint, startStroke){
         pleaseRedrawEverything = false;
         fullRedraw = false;
         nextPoint = lineHistory.length == 0 ? 0 : nextPoint;//reset next point if out of lines
-
+        nextLine = lineHistory.length == 0 ? 0 : lineHistory.length
         if(fullClear){// start again from 0.
             nextLine = 0;
             fullClear = false;
@@ -1178,12 +1176,149 @@ function startCursorBlink() {
         drawTextOnCanvas();
     }, 500);
 }
+//TODO fix small canvas border on large canvas after switch
+//TODO fix bug perfect freehand lines thick after delete mode?
+//TODO fix bug with the first text not having a proper box around it
+function createBoxWithDiagonalPoints(action) {
+    const lines = action.text.split(/(?<!\\\\)\\n/);
+    const allBoxPoints = [];
+    
+    const padding = 1;
+    const spacing = 8;
+    const lineHeight = calculateLineHeight(action.fontSize);
+    
+    let currentY = action.y;
+    
+    // Process each line separately
+    for (let i = 0; i < lines.length; i++) {
+        const lineText = lines[i];
+        
+        // Skip empty lines
+        // if (lineText.trim().length === 0) {
+        //     currentY += lineHeight;
+        //     continue;
+        // }
+        
+        const textWidth = ctx.measureText(lineText).width;
+        
+        // Calculate box for this line
+        const x = action.x - padding;
+        const y = currentY - padding;
+        const width = textWidth + padding * 2;
+        const height = action.fontSize + padding * 2;
+        
+        // Start with box corner points for this line
+        const points = [
+            [x, y],
+            [x + width, y],  
+            [x + width, y + height],
+            [x, y + height]
+        ];
+        
+        // Calculate diagonal lines for this box
+        const diagonalLength = Math.sqrt(width * width + height * height);
+        
+        // Generate lines in both directions
+        const directions = [
+            // Direction 1: y = x + b (top-left to bottom-right)
+            (i) => ({
+                startX: x + i,
+                startY: y,
+                endX: x + i + diagonalLength,
+                endY: y + diagonalLength,
+                isOpposite: false
+            }),
+            // Direction 2: y = -x + b (top-right to bottom-left)  
+            (i) => ({
+                startX: x + diagonalLength - i,
+                startY: y,
+                endX: x - i,
+                endY: y + diagonalLength,
+                isOpposite: true
+            })
+        ];
+        
+        directions.forEach(getLine => {
+            for (let j = -diagonalLength; j < diagonalLength; j += spacing) {
+                const line = getLine(j);
+                const intersection = lineIntersectsRect(
+                    line.startX, line.startY, line.endX, line.endY, 
+                    x, y, width, height,
+                    line.isOpposite
+                );
+                
+                if (intersection) {
+                    const [segmentStart, segmentEnd] = intersection;
+                    points.push(segmentStart, segmentEnd);
+                }
+            }
+        });
+        
+        // Add this line's box points to the combined array
+        allBoxPoints.push(...points);
+        
+        // Move Y position down for next line
+        currentY += lineHeight;
+    }
+    
+    return allBoxPoints;
+}
+
+// Updated unified intersection function
+function lineIntersectsRect(x1, y1, x2, y2, rectX, rectY, rectW, rectH, isOpposite = false) {
+    // Line equation: y = mx + b where m = 1 for normal, m = -1 for opposite
+    const m = isOpposite ? -1 : 1;
+    const b = y1 - m * x1;
+    
+    const intersections = [];
+    
+    // Intersection with left edge (x = rectX)
+    const yAtLeft = m * rectX + b;
+    if (yAtLeft >= rectY && yAtLeft <= rectY + rectH) {
+        if (x1 <= rectX && rectX <= x2 || x2 <= rectX && rectX <= x1) {
+            intersections.push([rectX, yAtLeft]);
+        }
+    }
+    
+    // Intersection with right edge (x = rectX + rectW)
+    const yAtRight = m * (rectX + rectW) + b;
+    if (yAtRight >= rectY && yAtRight <= rectY + rectH) {
+        if (x1 <= rectX + rectW && rectX + rectW <= x2 || 
+            x2 <= rectX + rectW && rectX + rectW <= x1) {
+            intersections.push([rectX + rectW, yAtRight]);
+        }
+    }
+    
+    // Intersection with top edge (y = rectY)
+    const xAtTop = (rectY - b) / m;
+    if (xAtTop >= rectX && xAtTop <= rectX + rectW) {
+        if (y1 <= rectY && rectY <= y2 || y2 <= rectY && rectY <= y1) {
+            intersections.push([xAtTop, rectY]);
+        }
+    }
+    
+    // Intersection with bottom edge (y = rectY + rectH)
+    const xAtBottom = (rectY + rectH - b) / m;
+    if (xAtBottom >= rectX && xAtBottom <= rectX + rectW) {
+        if (y1 <= rectY + rectH && rectY + rectH <= y2 || 
+            y2 <= rectY + rectH && rectY + rectH <= y1) {
+            intersections.push([xAtBottom, rectY + rectH]);
+        }
+    }
+    
+    if (intersections.length >= 2) {
+        intersections.sort((a, b) => a[0] - b[0]);
+        return [intersections[0], intersections[1]];
+    }
+    
+    return null;
+}
 
 function submitCurrentText() {
     if (currentAction && currentAction.text && currentAction.text.length > 0) {
 
         // Create and save box around the text
-        // const box = createBoxAroundText(currentEntry);
+        currentAction.points = createBoxWithDiagonalPoints(currentAction);
         // boxes.push(box);
         // Save the text entry
         add_action_to_history(currentAction)
@@ -1222,7 +1357,6 @@ function pointerDownLineText(e) {
         fontSize: fontSize,
         fontBold: fontBold,
         fontItalic: fontItalic
-        //TODO make text stroke deletable
     };
     textBox.focus()
 };

@@ -361,10 +361,14 @@ body {
 </style>"""
 
 def blackboard_js():
+    config = mw.addonManager.getConfig(__name__)
+    start_vis = str(config.get('start_visible', False)).lower()
+    start_pen = str(config.get('default_pen_index', 1))
+
     return u"""
 <script>
 // Set from python qt ui
-var visible = """ + ts_default_VISIBILITY + """;
+var visible = """ + start_vis + """;
 var perfectFreehand = """ + ts_default_PerfFreehand +""";
 var pressureSensitivity = """ + str(ts_pressure_sensitivity).lower() + """;
 var small_canvas = """ +  str(ts_default_small_canvas).lower() + """;
@@ -389,7 +393,7 @@ var fontFamily = """ + "\'" + str(ts_font_family) + "\'" + """;
 var fontSize = """ + str(ts_font_size) + """;
 var fontBold = """ + str(ts_font_bold).lower() + """;
 var fontItalic = """ + str(ts_font_italic).lower() + """;
-var activePenIndex = 0;
+var activePenIndex = """ + start_pen + """;
 var convertDotStrokes = true
 
 function getPenColorAndWidthByIndex(index){
@@ -461,6 +465,18 @@ var ts_switch_pen3_button_path = document.querySelector('#ts_switch_pen3_button 
 var ts_switch_pen4_button_path = document.querySelector('#ts_switch_pen4_button > svg > path');
 
 // Arrays to save point values from strokes
+if (!visible) {
+    canvas.style.display = 'none';
+    secondary_canvas.style.display = 'none';
+    
+    if (ts_visibility_button) {
+        ts_visibility_button.className = '';
+    }
+    
+    if (optionBar) {
+        optionBar.className = 'touch_disable';
+    }
+}
 var stroke_cache = [ ];
 var lineHistory = [ ] // contains history of currentAction Items, defined below
 var redoStack = [ ]
@@ -684,10 +700,9 @@ function switch_small_canvas()
 function switch_visibility()
 {
 	stop_drawing();
-    if (visible)
-    {
+    if (!visible) {
         canvas.style.display='none';
-        secondary_canvas.style.display=canvas.style.display;
+        secondary_canvas.style.display='none';
         ts_visibility_button.className = '';
         optionBar.className = 'touch_disable';
     }

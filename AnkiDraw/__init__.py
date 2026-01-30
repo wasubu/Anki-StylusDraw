@@ -396,6 +396,26 @@ var fontItalic = """ + str(ts_font_italic).lower() + """;
 var activePenIndex = """ + start_pen + """;
 var convertDotStrokes = true
 
+function forceShowCanvas() {
+    if (visible === false) { // Only change if it's currently false
+        visible = true;
+        canvas.style.display='block';
+        secondary_canvas.style.display='block';
+        if (ts_visibility_button) ts_visibility_button.className = 'active';
+        if (optionBar) optionBar.className = '';
+    }
+}
+
+function forceHideCanvas() {
+    if (visible === true) { // Only change if it's currently true
+        visible = false;
+        canvas.style.display='none';
+        secondary_canvas.style.display='none';
+        if (ts_visibility_button) ts_visibility_button.className = '';
+        if (optionBar) optionBar.className = 'touch_disable';
+    }
+}
+
 function getPenColorAndWidthByIndex(index){
     switch (index) {
         case 0:
@@ -2320,3 +2340,32 @@ def ts_onload():
     ts_setup_menu()
 
 ts_onload()
+
+from aqt.qt import QTimer
+
+def apply_visibility_logic():
+    """
+    Checks for the 'draw' tag and directly calls the
+    appropriate JavaScript function to show or hide the canvas.
+    """
+    if not mw.reviewer.card or not mw.reviewer.web:
+        return
+
+    target_tag = "draw" 
+
+    note_tags = [t.lower() for t in mw.reviewer.card.note().tags]
+    should_show = target_tag.lower() in note_tags
+
+    if should_show:
+        mw.reviewer.web.eval("forceShowCanvas();")
+    else:
+        mw.reviewer.web.eval("forceHideCanvas();")
+
+def check_for_draw_tag_wrapper(*args):
+    """
+    Wrapper to handle hook arguments and add a small delay
+    to ensure the card's web content is fully loaded.
+    """
+    QTimer.singleShot(100, apply_visibility_logic)
+
+addHook("showQuestion", check_for_draw_tag_wrapper)
